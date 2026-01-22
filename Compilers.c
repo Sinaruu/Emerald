@@ -2,7 +2,7 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Fall, 2025
-* Author: TO_DO
+* Author: Egor Kivilev, Hoang Thien Loc Ngyuen
 * Professors: Paulo Sousa
 ************************************************************
 #
