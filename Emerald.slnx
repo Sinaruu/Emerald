@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Emerald.vcxproj" />
+  <Project Path="Emerald.vcxproj" Id="e6e5a983-7104-4f11-9c7a-52090696a2ab" />
 </Solution>
