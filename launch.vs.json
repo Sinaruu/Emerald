@@ -1,0 +1,18 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "Compilers.exe",
+      "name": "Compilers.exe",
+      "args": [
+		1,
+		1,
+		"README.txt",
+		"CODED.txt"
+	  ]
+    }
+  ]
+}
