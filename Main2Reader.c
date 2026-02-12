@@ -111,7 +111,6 @@ emerald_void startReader(emerald_strg, emerald_strg, emerald_intg, emerald_real)
 */
 
 emerald_intg main2Reader(emerald_intg argc, emerald_intg* argv) {
-
 	/* Create source input buffer */
 	emerald_strg program = argv[0];
 	emerald_strg input = argv[2];

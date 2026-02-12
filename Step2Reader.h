@@ -100,8 +100,6 @@
 
 /* STRUCTURES DEFINITION: SUFIXED BY LANGUAGE NAME .................................. */
 
-/* TODO: Adjust datatypes */
-
 /* Offset declaration */
 typedef struct position {
 	emerald_intg wrte;					/* the offset to the add chars (in chars) */
