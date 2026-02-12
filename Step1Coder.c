@@ -2,7 +2,7 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Fall, 2025
-* Author: TO_DO
+* Author: Egor Kivilev, Hoang Thien Loc Ngyuen
 * Professors: Paulo Sousa
 ************************************************************
 #
@@ -72,7 +72,7 @@ void vigenereFile(const emerald_strg inputFileName, const emerald_strg outputFil
 	}
 
 	if (encode != CYPHER && encode != DECYPHER) {
-		errorPrint("Error: Invalid operation. Use 1 to CYPHER or 0 to DECYPHER\n");
+		errorPrint("Error: Invalid operation. Use CYPHER or DECYPHER\n");
 		return;
 	}
 
