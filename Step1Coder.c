@@ -76,6 +76,13 @@ void vigenereFile(const emerald_strg inputFileName, const emerald_strg outputFil
 		return;
 	}
 
+	// Check key length before opening/truncating output file
+	emerald_intg keyLen = (emerald_intg)strlen(key);
+	if (keyLen == 0) {
+		errorPrint("Error: Empty key provided\n");
+		return;
+	}
+
 	// Define the input and output files
 	FILE* inputFile = fopen(inputFileName, "r");
 	FILE* outputFile = fopen(outputFileName, "w");
@@ -94,7 +101,6 @@ void vigenereFile(const emerald_strg inputFileName, const emerald_strg outputFil
 
 	// Define local variables
 	emerald_intg ch;
-	emerald_intg keyLen = (emerald_intg)strlen(key);
 	emerald_intg keyIndex = 0;
 
 	// Check for empty key
@@ -185,7 +191,7 @@ emerald_strg vigenereMem(const emerald_strg inputFileName, const emerald_strg ke
 	}
 
 	// Logic to code/decode - considering visible chars only
-	while ((ch = fgetc(inputFile)) != EOF) {
+	while ((ch = fgetc(inputFile)) != EOF && outputIndex < size) {
 		// Only process visible ASCII characters
 		if (ch >= ASCII_START && ch <= ASCII_END) {
 			emerald_intg keyChar = key[keyIndex % keyLen];
@@ -210,8 +216,12 @@ emerald_strg vigenereMem(const emerald_strg inputFileName, const emerald_strg ke
 		}
 	}
 
-	// Null-terminate the string
-	output[outputIndex] = '\0';
+	// Null-terminate the string safely
+	if (outputIndex < size + 1) {
+		output[outputIndex] = '\0';
+	} else if (size > 0) {
+		output[size] = '\0';
+	}
 
 	// Close the file
 	fclose(inputFile);
