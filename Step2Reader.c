@@ -155,15 +155,17 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 	emerald_intg newSize = 0;
 	/* TO_DO: Check if readerPointer is NULL, if so return NULL */
 	if (readerPointer == NULL) {
+		printf("No pointer data to add character.");
 		return NULL;
 	}
 	/* TO_DO: Check if ch is a valid ASCII character (0-127), if not increment numReaderErrors and return NULL */
-	if (ch >= ASCII_START && ch <= ASCII_END) {
+	if (ch < ASCII_START || ch > ASCII_END) {
+		readerPointer->numReaderErrors++;
 		return NULL;
 	}
 
 	/* TO_DO: Check if there's space in buffer: compare (position.wrte < size) */
-	if (readerPointer->position.wrte * (emerald_intg)sizeof(emerald_char) < readerPointer->size) {
+	if (readerPointer->position.wrte < readerPointer->size) {
 		/* TO_DO: There IS space - set flags.isFull to EMERALD_FALSE */
 		readerPointer->flags.isFull = EMERALD_FALSE;
 		/* TO_DO: Set flags.isEmpty to EMERALD_FALSE (buffer now has content) */
@@ -171,30 +173,44 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 	}
 	else {
 		/* TO_DO: Buffer is full - need to grow it */
-		emerald_intg newSize = (readerPointer->size * READER_DEFAULT_FACTOR) + readerPointer->size;
-		BufferPointer newPointer = realloc(readerPointer, newSize);
 		/* TO_DO: Set flags.isFull to EMERALD_TRUE */
-
+		readerPointer->flags.isFull = EMERALD_TRUE;
 		/* TO_DO: Calculate newSize using formula: newSize = (emerald_intg)(readerPointer->size * (1.0 + readerPointer->factor)) */
+		emerald_intg newSize = (readerPointer->size * READER_DEFAULT_FACTOR) + readerPointer->size;
 		/* TO_DO: Check if newSize is valid: must be positive and <= READER_MAX_SIZE, if not return NULL */
-
+		if (newSize <= 0 || newSize > READER_MAX_SIZE) {
+			readerPointer->numReaderErrors++;
+			return NULL;
+		}
 		/* TO_DO: Try to reallocate memory: tempReader = (emerald_strg)realloc(readerPointer->content, newSize) */
+		tempReader = realloc(readerPointer->content, newSize);
 		/* TO_DO: Check if realloc succeeded (tempReader != NULL), if failed return NULL */
-
+		if (tempReader == NULL) {
+			readerPointer->numReaderErrors++;
+			return NULL;
+		}
 		/* TO_DO: Check if memory address changed: compare tempReader with readerPointer->content */
 		/* TO_DO: If address changed, set flags.isMoved to EMERALD_TRUE */
-
 		/* TO_DO: Update readerPointer->content = tempReader */
 		/* TO_DO: Update readerPointer->size = newSize */
 		/* TO_DO: Set flags.isFull to EMERALD_FALSE (we just made more space) */
+		if (tempReader != readerPointer->content) {
+			readerPointer->flags.isMoved = EMERALD_TRUE;
+		}
+		readerPointer->content = tempReader;
+		readerPointer->size = newSize;
+		readerPointer->flags.isFull = EMERALD_FALSE;
 	}
 
 	/* TO_DO: Add the character: readerPointer->content[readerPointer->position.wrte] = ch */
+	readerPointer->content[readerPointer->position.wrte] = ch;
 	/* TO_DO: Increment write position: readerPointer->position.wrte++ */
-
+	readerPointer->position.wrte++;
 	/* TO_DO: Update histogram for this character: readerPointer->histogram[(int)ch]++ */
 	/* TO_DO: Note: only update histogram if ch is in valid range (0-127) */
-
+	if (ch >= ASCII_START && ch <= ASCII_END) {
+		readerPointer->histogram[(int)ch]++;
+	}
 	return readerPointer;
 }
 
@@ -214,19 +230,29 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 */
 emerald_boln readerClear(BufferPointer const readerPointer) {
 	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
-
+	if (readerPointer == NULL) {
+		printf("No pointer data to clear.");
+			return EMERALD_FALSE;
+	}
 	/* TO_DO: Reset all positions to zero:
 	   - position.wrte = 0
 	   - position.read = 0
 	   - position.mark = 0 */
-
+	readerPointer->position.wrte = 0;
+	readerPointer->position.read = 0;
+	readerPointer->position.mark = 0;
 	   /* TO_DO: Reset flags to initial state:
 		  - flags.isEmpty = EMERALD_TRUE
 		  - flags.isFull = EMERALD_FALSE
 		  - flags.isRead = EMERALD_FALSE
 		  - flags.isMoved = EMERALD_FALSE */
+	readerPointer->flags.isEmpty = EMERALD_TRUE;
+	readerPointer->flags.isFull = EMERALD_FALSE;
+	readerPointer->flags.isRead = EMERALD_FALSE;
+	readerPointer->flags.isMoved = EMERALD_FALSE;
+	
 
-	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
+	return EMERALD_TRUE;  /* TO_DO: Change to EMERALD_TRUE on success */
 }
 
 /*
@@ -244,13 +270,14 @@ emerald_boln readerClear(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerFree(BufferPointer const readerPointer) {
-	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
 
-	/* TO_DO: Free the content buffer: free(readerPointer->content) */
-	/* TO_DO: Free the reader structure itself: free(readerPointer) */
-	/* TO_DO: Note: Free content BEFORE freeing the structure */
+	free(readerPointer->content);
+	free(readerPointer);
 
-	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
+	return EMERALD_TRUE;
 }
 
 /*
