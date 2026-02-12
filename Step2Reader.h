@@ -105,55 +105,55 @@
 /* Offset declaration */
 typedef struct position {
 	emerald_intg wrte;					/* the offset to the add chars (in chars) */
-	sofia_intg read;					/* the offset to the get a char position (in chars) */
-	sofia_intg mark;					/* the offset to the mark position (in chars) */
+	emerald_intg read;					/* the offset to the get a char position (in chars) */
+	emerald_intg mark;					/* the offset to the mark position (in chars) */
 } Position;
 
 /* Flags declaration */
 typedef struct flag {
-	sofia_boln isEmpty;					/* checks if there is no content */
-	sofia_boln isFull;					/* the content is using all size */
-	sofia_boln isRead;					/* all content was read */
-	sofia_boln isMoved;					/* the content was moved in reallocation */
+	emerald_boln isEmpty;					/* checks if there is no content */
+	emerald_boln isFull;					/* the content is using all size */
+	emerald_boln isRead;					/* all content was read */
+	emerald_boln isMoved;					/* the content was moved in reallocation */
 } Flag;
 
 /* Buffer structure */
 typedef struct bufferReader {
-	sofia_strg		content;			/* pointer to the beginning of character array (character buffer) */
-	sofia_intg		size;				/* current dynamic memory size (in bytes) allocated to character buffer */
-	sofia_real		factor;				/* factor for increase the buffer */
+	emerald_strg		content;			/* pointer to the beginning of character array (character buffer) */
+	emerald_intg		size;				/* current dynamic memory size (in bytes) allocated to character buffer */
+	emerald_real		factor;				/* factor for increase the buffer */
 	Flag			flags;				/* contains character array reallocation flag and end-of-buffer flag */
 	Position		position;			/* Offset / position field */
-	sofia_intg		histogram[NCHAR];	/* Statistics of chars */
-	sofia_intg		numReaderErrors;	/* Number of errors from Reader */
-	sofia_intg		checkSum;			/* Sum of bytes(chars) */
+	emerald_intg		histogram[NCHAR];	/* Statistics of chars */
+	emerald_intg		numReaderErrors;	/* Number of errors from Reader */
+	emerald_intg		checkSum;			/* Sum of bytes(chars) */
 } Buffer, * BufferPointer;
 
 /* FUNCTIONS DECLARATION:  .................................. */
 
 /* General Operations */
 BufferPointer	readerCreate(sofia_intg, sofia_real);
-BufferPointer	readerAddChar(BufferPointer const, sofia_char);
-sofia_boln		readerClear(BufferPointer const);
-sofia_boln		readerFree(BufferPointer const);
-sofia_boln		readerIsFull(BufferPointer const);
-sofia_boln		readerIsEmpty(BufferPointer const);
-sofia_boln		readerSetMark(BufferPointer const, sofia_intg);
-sofia_intg		readerPrint(BufferPointer const);
-sofia_intg		readerLoad(BufferPointer const, sofia_strg);
-sofia_boln		readerRecover(BufferPointer const);
-sofia_boln		readerRetract(BufferPointer const);
-sofia_boln		readerRestore(BufferPointer const);
-sofia_intg		readerChecksum(BufferPointer const);
+BufferPointer	readerAddChar(BufferPointer const, emerald_char);
+emerald_boln		readerClear(BufferPointer const);
+emerald_boln		readerFree(BufferPointer const);
+emerald_boln		readerIsFull(BufferPointer const);
+emerald_boln		readerIsEmpty(BufferPointer const);
+emerald_boln		readerSetMark(BufferPointer const, emerald_intg);
+emerald_intg		readerPrint(BufferPointer const);
+emerald_intg		readerLoad(BufferPointer const, emerald_strg);
+emerald_boln		readerRecover(BufferPointer const);
+emerald_boln		readerRetract(BufferPointer const);
+emerald_boln		readerRestore(BufferPointer const);
+emerald_intg		readerChecksum(BufferPointer const);
 /* Getters */
-sofia_char		readerGetChar(BufferPointer const);
-sofia_strg		readerGetContent(BufferPointer const, sofia_intg);
-sofia_intg		readerGetPosRead(BufferPointer const);
-sofia_intg		readerGetPosWrte(BufferPointer const);
-sofia_intg		readerGetPosMark(BufferPointer const);
-sofia_intg		readerGetSize(BufferPointer const);
-sofia_void		readerPrintFlags(BufferPointer const);
-sofia_void		readerPrintStat(BufferPointer const);
-sofia_intg		readerNumErrors(BufferPointer const);
+emerald_char		readerGetChar(BufferPointer const);
+emerald_strg		readerGetContent(BufferPointer const, emerald_intg);
+emerald_intg		readerGetPosRead(BufferPointer const);
+emerald_intg		readerGetPosWrte(BufferPointer const);
+emerald_intg		readerGetPosMark(BufferPointer const);
+emerald_intg		readerGetSize(BufferPointer const);
+emerald_void		readerPrintFlags(BufferPointer const);
+emerald_void		readerPrintStat(BufferPointer const);
+emerald_intg		readerNumErrors(BufferPointer const);
 
 #endif
