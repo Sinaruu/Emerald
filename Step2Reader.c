@@ -88,14 +88,14 @@
 *************************************************************
 */
 
-BufferPointer readerCreate(sofia_intg size, sofia_real factor) {
+BufferPointer readerCreate(emerald_intg size, emerald_real factor) {
 	BufferPointer readerPointer = NULL;
 	/* TO_DO: Defensive programming: size */
 	/* TO_DO: readerPointer allocation */
 	/* TO_DO: Defensive programming: readerPointer */
 	readerPointer = calloc(1, sizeof(Buffer));
 	/* TO_DO: content allocation */
-	sofia_strg content = malloc(size);
+	emerald_strg content = malloc(size);
 	if (readerPointer!=NULL && content!=NULL) {
 		readerPointer->content = content;
 	}
@@ -125,12 +125,12 @@ BufferPointer readerCreate(sofia_intg size, sofia_real factor) {
 *************************************************************
 */
 
-BufferPointer readerAddChar(BufferPointer const readerPointer, sofia_char ch) {
-	sofia_strg tempReader = NULL;
-	sofia_intg newSize = 0;
+BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) {
+	emerald_strg tempReader = NULL;
+	emerald_intg newSize = 0;
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Test the inclusion of chars */
-	if (readerPointer->position.wrte * (sofia_intg)sizeof(sofia_char) < readerPointer->size) {
+	if (readerPointer->position.wrte * (emerald_intg)sizeof(emerald_char) < readerPointer->size) {
 		/* TO_DO: Buffer not full: set flag */
 	}
 	else {
@@ -157,11 +157,11 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, sofia_char ch) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerClear(BufferPointer const readerPointer) {
+emerald_boln readerClear(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Adjust positions to zero */
 	/* TO_DO: Adjust flags original */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 /*
@@ -178,10 +178,10 @@ sofia_boln readerClear(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerFree(BufferPointer const readerPointer) {
+emerald_boln readerFree(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* Free memory (buffer/content) */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 /*
@@ -198,10 +198,10 @@ sofia_boln readerFree(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerIsFull(BufferPointer const readerPointer) {
+emerald_boln readerIsFull(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Check flag if buffer is FUL */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 
@@ -219,10 +219,10 @@ sofia_boln readerIsFull(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerIsEmpty(BufferPointer const readerPointer) {
+emerald_boln readerIsEmpty(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Check flag if buffer is EMP */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 /*
@@ -240,10 +240,10 @@ sofia_boln readerIsEmpty(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerSetMark(BufferPointer const readerPointer, sofia_intg mark) {
+emerald_boln readerSetMark(BufferPointer const readerPointer, emerald_intg mark) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Adjust mark */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 
@@ -261,7 +261,7 @@ sofia_boln readerSetMark(BufferPointer const readerPointer, sofia_intg mark) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerPrint(BufferPointer const readerPointer) {
+emerald_intg readerPrint(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming (including invalid chars) */
 	/* TO_DO: Print the buffer content */
 	return 0;
@@ -283,7 +283,7 @@ sofia_intg readerPrint(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerLoad(BufferPointer const readerPointer, sofia_strg fileName) {
+emerald_intg readerLoad(BufferPointer const readerPointer, emerald_strg fileName) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Loads the file */
 	/* TO_DO: Creates the string calling vigenereMem(fileName, STR_LANGNAME, DECYPHER) */
@@ -304,10 +304,10 @@ sofia_intg readerLoad(BufferPointer const readerPointer, sofia_strg fileName) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerRecover(BufferPointer const readerPointer) {
+emerald_boln readerRecover(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Adjust read and mark to zero */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 
@@ -325,10 +325,10 @@ sofia_boln readerRecover(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerRetract(BufferPointer const readerPointer) {
+emerald_boln readerRetract(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Retract (return 1 pos read) */
-	return SOFIA_FALSE;
+	return EMERALD_FALSE;
 }
 
 
@@ -346,10 +346,10 @@ sofia_boln readerRetract(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_boln readerRestore(BufferPointer const readerPointer) {
+emerald_boln readerRestore(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Restore read to mark */
-	return SOFIA_TRUE;
+	return EMERALD_TRUE;
 }
 
 
@@ -368,7 +368,7 @@ sofia_boln readerRestore(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_char readerGetChar(BufferPointer const readerPointer) {
+emerald_char readerGetChar(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Returns size in the read position and updates read */
 	return '\0';
@@ -390,7 +390,7 @@ sofia_char readerGetChar(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_strg readerGetContent(BufferPointer const readerPointer, sofia_intg pos) {
+emerald_strg readerGetContent(BufferPointer const readerPointer, emerald_intg pos) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return content (string) */
 	return NULL;
@@ -410,7 +410,7 @@ sofia_strg readerGetContent(BufferPointer const readerPointer, sofia_intg pos) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetPosRead(BufferPointer const readerPointer) {
+emerald_intg readerGetPosRead(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return read */
 	return 0;
@@ -431,7 +431,7 @@ sofia_intg readerGetPosRead(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetPosWrte(BufferPointer const readerPointer) {
+emerald_intg readerGetPosWrte(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return wrte */
 	return 0;
@@ -452,7 +452,7 @@ sofia_intg readerGetPosWrte(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetPosMark(BufferPointer const readerPointer) {
+emerald_intg readerGetPosMark(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return mark */
 	return 0;
@@ -473,7 +473,7 @@ sofia_intg readerGetPosMark(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerGetSize(BufferPointer const readerPointer) {
+emerald_intg readerGetSize(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return size */
 	return 0;
@@ -496,7 +496,7 @@ sofia_intg readerGetSize(BufferPointer const readerPointer) {
 #define FLAGS_
 #undef FLAGS_
 #ifndef FLAGS_
-sofia_void readerPrintFlags(BufferPointer const readerPointer) {
+emerald_void readerPrintFlags(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	if (!readerPointer)
 		return;
@@ -518,7 +518,7 @@ sofia_void readerPrintFlags(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_void readerPrintStat(BufferPointer const readerPointer) {
+emerald_void readerPrintStat(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Print statistics */
 }
@@ -536,7 +536,7 @@ sofia_void readerPrintStat(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-sofia_intg readerNumErrors(BufferPointer const readerPointer) {
+emerald_intg readerNumErrors(BufferPointer const readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return the number of errors */
 	return 0;
@@ -557,7 +557,7 @@ sofia_intg readerNumErrors(BufferPointer const readerPointer) {
 *************************************************************
 */
 
-sofia_intg readerChecksum(BufferPointer readerPointer) {
+emerald_intg readerChecksum(BufferPointer readerPointer) {
 	/* TO_DO: Defensive programming */
 	/* TO_DO: Return the checksum (given by the content) */
 	return 0;
