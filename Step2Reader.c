@@ -153,18 +153,48 @@ BufferPointer readerCreate(emerald_intg size, emerald_real factor) {
 BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) {
 	emerald_strg tempReader = NULL;
 	emerald_intg newSize = 0;
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Test the inclusion of chars */
+	/* TO_DO: Check if readerPointer is NULL, if so return NULL */
+	if (readerPointer == NULL) {
+		return NULL;
+	}
+	/* TO_DO: Check if ch is a valid ASCII character (0-127), if not increment numReaderErrors and return NULL */
+	if (ch >= ASCII_START && ch <= ASCII_END) {
+		return NULL;
+	}
+
+	/* TO_DO: Check if there's space in buffer: compare (position.wrte < size) */
 	if (readerPointer->position.wrte * (emerald_intg)sizeof(emerald_char) < readerPointer->size) {
-		/* TO_DO: Buffer not full: set flag */
+		/* TO_DO: There IS space - set flags.isFull to EMERALD_FALSE */
+		readerPointer->flags.isFull = EMERALD_FALSE;
+		/* TO_DO: Set flags.isEmpty to EMERALD_FALSE (buffer now has content) */
+		readerPointer->flags.isEmpty = EMERALD_FALSE;
 	}
 	else {
-		/* TO_DO: Reset Full flag */
-		/* TO_DO: Adjust the size to be duplicated */
-		/* TO_DO: Defensive programming */
+		/* TO_DO: Buffer is full - need to grow it */
+		emerald_intg newSize = (readerPointer->size * READER_DEFAULT_FACTOR) + readerPointer->size;
+		BufferPointer newPointer = realloc(readerPointer, newSize);
+		/* TO_DO: Set flags.isFull to EMERALD_TRUE */
+
+		/* TO_DO: Calculate newSize using formula: newSize = (emerald_intg)(readerPointer->size * (1.0 + readerPointer->factor)) */
+		/* TO_DO: Check if newSize is valid: must be positive and <= READER_MAX_SIZE, if not return NULL */
+
+		/* TO_DO: Try to reallocate memory: tempReader = (emerald_strg)realloc(readerPointer->content, newSize) */
+		/* TO_DO: Check if realloc succeeded (tempReader != NULL), if failed return NULL */
+
+		/* TO_DO: Check if memory address changed: compare tempReader with readerPointer->content */
+		/* TO_DO: If address changed, set flags.isMoved to EMERALD_TRUE */
+
+		/* TO_DO: Update readerPointer->content = tempReader */
+		/* TO_DO: Update readerPointer->size = newSize */
+		/* TO_DO: Set flags.isFull to EMERALD_FALSE (we just made more space) */
 	}
-	/* TO_DO: Add the char */
-	/* TO_DO: Updates histogram */
+
+	/* TO_DO: Add the character: readerPointer->content[readerPointer->position.wrte] = ch */
+	/* TO_DO: Increment write position: readerPointer->position.wrte++ */
+
+	/* TO_DO: Update histogram for this character: readerPointer->histogram[(int)ch]++ */
+	/* TO_DO: Note: only update histogram if ch is in valid range (0-127) */
+
 	return readerPointer;
 }
 
@@ -183,10 +213,20 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 *************************************************************
 */
 emerald_boln readerClear(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Adjust positions to zero */
-	/* TO_DO: Adjust flags original */
-	return EMERALD_FALSE;
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Reset all positions to zero:
+	   - position.wrte = 0
+	   - position.read = 0
+	   - position.mark = 0 */
+
+	   /* TO_DO: Reset flags to initial state:
+		  - flags.isEmpty = EMERALD_TRUE
+		  - flags.isFull = EMERALD_FALSE
+		  - flags.isRead = EMERALD_FALSE
+		  - flags.isMoved = EMERALD_FALSE */
+
+	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
 }
 
 /*
@@ -204,9 +244,13 @@ emerald_boln readerClear(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerFree(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* Free memory (buffer/content) */
-	return EMERALD_FALSE;
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Free the content buffer: free(readerPointer->content) */
+	/* TO_DO: Free the reader structure itself: free(readerPointer) */
+	/* TO_DO: Note: Free content BEFORE freeing the structure */
+
+	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
 }
 
 /*
@@ -224,8 +268,10 @@ emerald_boln readerFree(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerIsFull(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Check flag if buffer is FUL */
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Return the value of flags.isFull */
+
 	return EMERALD_FALSE;
 }
 
@@ -245,8 +291,10 @@ emerald_boln readerIsFull(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerIsEmpty(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Check flag if buffer is EMP */
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Return the value of flags.isEmpty */
+
 	return EMERALD_FALSE;
 }
 
@@ -266,9 +314,14 @@ emerald_boln readerIsEmpty(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerSetMark(BufferPointer const readerPointer, emerald_intg mark) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Adjust mark */
-	return EMERALD_FALSE;
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Check if mark is valid: must be >= 0 and <= position.wrte */
+	/* TO_DO: If mark is invalid, return EMERALD_FALSE */
+
+	/* TO_DO: Set position.mark = mark */
+
+	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
 }
 
 
@@ -287,8 +340,20 @@ emerald_boln readerSetMark(BufferPointer const readerPointer, emerald_intg mark)
 *************************************************************
 */
 emerald_intg readerPrint(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming (including invalid chars) */
-	/* TO_DO: Print the buffer content */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
+	/* TO_DO: Create a counter for number of chars printed */
+	/* TO_DO: Save current position.read value */
+	/* TO_DO: Reset position.read to 0 using readerRecover() */
+
+	/* TO_DO: Loop while flags.isRead is FALSE:
+	   - Call readerGetChar() to get next character
+	   - Print the character using printf("%c", ch)
+	   - Increment counter */
+
+	   /* TO_DO: Restore position.read to saved value */
+	   /* TO_DO: Return the counter (number of chars printed) */
+
 	return 0;
 }
 
@@ -309,9 +374,23 @@ emerald_intg readerPrint(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_intg readerLoad(BufferPointer const readerPointer, emerald_strg fileName) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Loads the file */
-	/* TO_DO: Creates the string calling vigenereMem(fileName, STR_LANGNAME, DECYPHER) */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR */
+	/* TO_DO: Check if fileName is NULL, if so return READER_ERROR */
+
+	/* TO_DO: Call vigenereMem(fileName, STR_LANGNAME, DECYPHER) to decrypt file */
+	/* TO_DO: Store result in a string variable (decryptedContent) */
+	/* TO_DO: Check if decryptedContent is NULL, if so return READER_ERROR */
+
+	/* TO_DO: Create counter for chars loaded */
+	/* TO_DO: Loop through each character in decryptedContent:
+	   - Call readerAddChar() to add each character
+	   - Check if readerAddChar() returns NULL (error occurred)
+	   - If error, free decryptedContent and return READER_ERROR
+	   - Increment counter */
+
+	   /* TO_DO: Free the decryptedContent memory */
+	   /* TO_DO: Return counter (number of chars loaded) */
+
 	return 0;
 }
 
@@ -330,9 +409,12 @@ emerald_intg readerLoad(BufferPointer const readerPointer, emerald_strg fileName
 *************************************************************
 */
 emerald_boln readerRecover(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Adjust read and mark to zero */
-	return EMERALD_FALSE;
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Set position.read = 0 */
+	/* TO_DO: Set position.mark = 0 */
+
+	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
 }
 
 
@@ -351,9 +433,14 @@ emerald_boln readerRecover(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerRetract(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Retract (return 1 pos read) */
-	return EMERALD_FALSE;
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Check if position.read > 0 (can't retract if at beginning) */
+	/* TO_DO: If position.read is 0, return EMERALD_FALSE */
+
+	/* TO_DO: Decrement position.read by 1: position.read-- */
+
+	return EMERALD_FALSE;  /* TO_DO: Change to EMERALD_TRUE on success */
 }
 
 
@@ -372,8 +459,10 @@ emerald_boln readerRetract(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_boln readerRestore(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Restore read to mark */
+	/* TO_DO: Check if readerPointer is NULL, if so return EMERALD_FALSE */
+
+	/* TO_DO: Set position.read = position.mark (restore to marked position) */
+
 	return EMERALD_TRUE;
 }
 
@@ -394,8 +483,17 @@ emerald_boln readerRestore(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_char readerGetChar(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Returns size in the read position and updates read */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_TERMINATOR ('\0') */
+
+	/* TO_DO: Check if position.read >= position.wrte (reached end of content) */
+	/* TO_DO: If at end, set flags.isRead = EMERALD_TRUE and return READER_TERMINATOR */
+
+	/* TO_DO: Set flags.isRead = EMERALD_FALSE (not at end) */
+
+	/* TO_DO: Get character at current read position: ch = content[position.read] */
+	/* TO_DO: Increment position.read++ */
+	/* TO_DO: Return the character */
+
 	return '\0';
 }
 
@@ -416,8 +514,13 @@ emerald_char readerGetChar(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_strg readerGetContent(BufferPointer const readerPointer, emerald_intg pos) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return content (string) */
+	/* TO_DO: Check if readerPointer is NULL, if so return NULL */
+
+	/* TO_DO: Check if pos is valid: must be >= 0 and < position.wrte */
+	/* TO_DO: If pos is invalid, return NULL */
+
+	/* TO_DO: Return pointer to content starting at position: return &(readerPointer->content[pos]) */
+
 	return NULL;
 }
 
@@ -436,8 +539,10 @@ emerald_strg readerGetContent(BufferPointer const readerPointer, emerald_intg po
 *************************************************************
 */
 emerald_intg readerGetPosRead(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return read */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
+	/* TO_DO: Return position.read */
+
 	return 0;
 }
 
@@ -457,8 +562,10 @@ emerald_intg readerGetPosRead(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_intg readerGetPosWrte(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return wrte */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
+	/* TO_DO: Return position.wrte */
+
 	return 0;
 }
 
@@ -478,8 +585,10 @@ emerald_intg readerGetPosWrte(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_intg readerGetPosMark(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return mark */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
+	/* TO_DO: Return position.mark */
+
 	return 0;
 }
 
@@ -499,8 +608,10 @@ emerald_intg readerGetPosMark(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_intg readerGetSize(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
 	/* TO_DO: Return size */
+
 	return 0;
 }
 
@@ -522,10 +633,15 @@ emerald_intg readerGetSize(BufferPointer const readerPointer) {
 #undef FLAGS_
 #ifndef FLAGS_
 emerald_void readerPrintFlags(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
+	/* TO_DO: Check if readerPointer is NULL, if so return immediately */
 	if (!readerPointer)
 		return;
-	/* TO_DO: Return flags */
+
+	/* TO_DO: Print all four flags with labels:
+	   printf("Flag.isEmpty = %d\n", readerPointer->flags.isEmpty);
+	   printf("Flag.isFull = %d\n", readerPointer->flags.isFull);
+	   printf("Flag.isMoved = %d\n", readerPointer->flags.isMoved);
+	   printf("Flag.isRead = %d\n", readerPointer->flags.isRead); */
 }
 #else
 #define bGetFlags(readerPointer) ((readerPointer)?(readerPointer->flags):(RT_FAIL_1))
@@ -544,8 +660,12 @@ emerald_void readerPrintFlags(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_void readerPrintStat(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Print statistics */
+	/* TO_DO: Check if readerPointer is NULL, if so return immediately */
+
+	/* TO_DO: Loop through histogram array (0 to NCHAR-1):
+	   - If histogram[i] > 0, print: "B[char]=%d, " where char is (char)i
+	   - This shows which characters were found and how many times
+	   - Example output: B[a]=5, B[b]=3, B[ ]=10, */
 }
 
 /*
@@ -562,8 +682,10 @@ emerald_void readerPrintStat(BufferPointer const readerPointer) {
 *************************************************************
 */
 emerald_intg readerNumErrors(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return the number of errors */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
+	/* TO_DO: Return numReaderErrors */
+
 	return 0;
 }
 
@@ -583,7 +705,17 @@ emerald_intg readerNumErrors(BufferPointer const readerPointer) {
 */
 
 emerald_intg readerChecksum(BufferPointer readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return the checksum (given by the content) */
+	/* TO_DO: Check if readerPointer is NULL, if so return READER_ERROR (-1) */
+
+	/* TO_DO: Create variable to hold sum: emerald_intg sum = 0 */
+
+	/* TO_DO: Loop through all characters in content (from 0 to position.wrte):
+	   - Add each character's ASCII value to sum
+	   - sum += (int)content[i] */
+
+	   /* TO_DO: Calculate checksum using 8 bits: checkSum = sum & 0xFF */
+	   /* TO_DO: Store result in readerPointer->checkSum */
+	   /* TO_DO: Return the checkSum value */
+
 	return 0;
 }
