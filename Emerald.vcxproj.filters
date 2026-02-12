@@ -24,12 +24,21 @@
     <ClCompile Include="Step1Coder.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Main2Reader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Step2Reader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compilers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Step1Coder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Step2Reader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
