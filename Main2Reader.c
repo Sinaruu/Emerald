@@ -95,10 +95,10 @@
  *  Function declarations
  * -------------------------------------------------------------
  */
-sofia_void displayBuffer(BufferPointer ptr_Buffer);
-sofia_long getFileSize(sofia_strg fname);
-sofia_intg isNumber(const sofia_strg ns);
-sofia_void startReader(sofia_strg, sofia_strg, sofia_intg, sofia_real);
+emerald_void displayBuffer(BufferPointer ptr_Buffer);
+emerald_long getFileSize(emerald_strg fname);
+emerald_intg isNumber(const emerald_strg ns);
+emerald_void startReader(emerald_strg, emerald_strg, emerald_intg, emerald_real);
 
 /*
 ************************************************************
@@ -110,13 +110,13 @@ sofia_void startReader(sofia_strg, sofia_strg, sofia_intg, sofia_real);
 ************************************************************
 */
 
-sofia_intg main2Reader(sofia_intg argc, sofia_strg* argv) {
+emerald_intg main2Reader(emerald_intg argc, emerald_intg* argv) {
 
 	/* Create source input buffer */
-	sofia_strg program = argv[0];
-	sofia_strg input = argv[2];
-	sofia_intg size = 0;
-	sofia_real factor = 0.0f;
+	emerald_strg program = argv[0];
+	emerald_strg input = argv[2];
+	emerald_intg size = 0;
+	emerald_real factor = 0.0f;
 	/* Missing file name or/and mode parameter */
 	if (argc <= 2) {
 		errorPrint("\nDate: %s  Time: %s", __DATE__, __TIME__);
