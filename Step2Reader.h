@@ -100,8 +100,6 @@
 
 /* STRUCTURES DEFINITION: SUFIXED BY LANGUAGE NAME .................................. */
 
-/* TODO: Adjust datatypes */
-
 /* Offset declaration */
 typedef struct position {
 	emerald_intg wrte;					/* the offset to the add chars (in chars) */
@@ -122,8 +120,8 @@ typedef struct bufferReader {
 	emerald_strg		content;			/* pointer to the beginning of character array (character buffer) */
 	emerald_intg		size;				/* current dynamic memory size (in bytes) allocated to character buffer */
 	emerald_real		factor;				/* factor for increase the buffer */
-	Flag			flags;				/* contains character array reallocation flag and end-of-buffer flag */
-	Position		position;			/* Offset / position field */
+	Flag				flags;				/* contains character array reallocation flag and end-of-buffer flag */
+	Position			position;			/* Offset / position field */
 	emerald_intg		histogram[NCHAR];	/* Statistics of chars */
 	emerald_intg		numReaderErrors;	/* Number of errors from Reader */
 	emerald_intg		checkSum;			/* Sum of bytes(chars) */

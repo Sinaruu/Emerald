@@ -2,7 +2,7 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Summer, 2025
-* Author: TO_DO
+* Author: Egor Kivilev, Hoang Thien Loc Ngyuen
 * Professors: Paulo Sousa
 ************************************************************
 #
@@ -43,14 +43,6 @@
 ************************************************************
 */
 
-/*
- *.............................................................................
- * MAIN ADVICE:
- * - Please check the "TODO" labels to develop your activity.
- * - Review the functions to use "Defensive Programming".
- *.............................................................................
- */
-
 #include <ctype.h>
 #include <string.h>
 
@@ -90,21 +82,54 @@
 
 BufferPointer readerCreate(emerald_intg size, emerald_real factor) {
 	BufferPointer readerPointer = NULL;
-	/* TO_DO: Defensive programming: size */
-	/* TO_DO: readerPointer allocation */
-	/* TO_DO: Defensive programming: readerPointer */
-	readerPointer = calloc(1, sizeof(Buffer));
-	/* TO_DO: content allocation */
-	emerald_strg content = malloc(size);
-	if (readerPointer!=NULL && content!=NULL) {
-		readerPointer->content = content;
+
+	// Defensive programming: validate size
+	if (size < 0 || size > READER_MAX_SIZE) {
+		size = READER_DEFAULT_SIZE;
 	}
-	/* TO_DO: Defensive programming: content */
-	/* TO_DO: Initialize the histogram */
-	/* TO_DO: Initialize errors */
-	/* TO_DO: Update the properties */
-	/* TO_DO: Initialize flags */
-	/* TO_DO: The created flag must be signalized as EMP */
+
+	// Defensive programming: validate factor
+	if (factor < 0) {
+		factor = READER_DEFAULT_FACTOR;
+	}
+
+	// Allocate reader structure
+	readerPointer = (BufferPointer)calloc(1, sizeof(Buffer));
+	if (readerPointer == NULL) {
+		return NULL;
+	}
+
+	// Allocate content buffer
+	readerPointer->content = (emerald_strg)malloc(size);
+	if (readerPointer->content == NULL) {
+		free(readerPointer);  // Clean up before returning
+		return NULL;
+	}
+
+	// Initialize size and factor
+	readerPointer->size = size;
+	readerPointer->factor = factor;
+
+	// Initialize positions
+	readerPointer->position.wrte = 0;
+	readerPointer->position.read = 0;
+	readerPointer->position.mark = 0;
+
+	// Initialize flags
+	readerPointer->flags.isEmpty = EMERALD_TRUE;  // Buffer starts empty
+	readerPointer->flags.isFull = EMERALD_FALSE;
+	readerPointer->flags.isRead = EMERALD_FALSE;
+	readerPointer->flags.isMoved = EMERALD_FALSE;
+
+	// Initialize histogram
+	for (emerald_intg i = 0; i < NCHAR; i++) {
+		readerPointer->histogram[i] = 0;
+	}
+
+	// Initialize error counter and checksum
+	readerPointer->numReaderErrors = 0;
+	readerPointer->checkSum = 0;
+
 	return readerPointer;
 }
 
