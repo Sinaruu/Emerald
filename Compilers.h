@@ -115,6 +115,7 @@ Main functions signatures
 ------------------------------------------------------------
 */
 emerald_intg main1Coder	(emerald_intg argc, emerald_strg* argv);
+emerald_intg main2Reader (emerald_intg argc, emerald_strg* argv);
 
 emerald_void printLogo();
 emerald_void errorPrint(emerald_strg fmt, ...);

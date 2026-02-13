@@ -149,7 +149,7 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 		return NULL;
 	}
 
-	if (ch < ASCII_START || ch > ASCII_END) {
+	if (ch < READER_ASCII_START || ch > READER_ASCII_END) {
 		readerPointer->numReaderErrors++;
 		return NULL;
 	}
@@ -161,7 +161,8 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 	else {
 		readerPointer->flags.isFull = EMERALD_TRUE;
 
-		emerald_intg newSize = (readerPointer->size * READER_DEFAULT_FACTOR) + readerPointer->size;
+		emerald_real ratio = 1.0f + readerPointer->factor;
+		emerald_intg newSize = (emerald_intg)(readerPointer->size * ratio);
 
 		if (newSize <= 0 || newSize > READER_MAX_SIZE) {
 			readerPointer->numReaderErrors++;
@@ -186,7 +187,7 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 	readerPointer->content[readerPointer->position.wrte] = ch;
 	readerPointer->position.wrte++;
 
-	if (ch >= ASCII_START && ch <= ASCII_END) {
+	if (ch >= READER_ASCII_START && ch <= READER_ASCII_END) {
 		readerPointer->histogram[(int)ch]++;
 	}
 	return readerPointer;
@@ -364,7 +365,7 @@ emerald_intg readerLoad(BufferPointer const readerPointer, emerald_strg fileName
 
 	emerald_intg charCount = 0;
 
-	while (*decryptedContent) {
+	while (decryptedContent[charCount] != '\0') {
 		BufferPointer status = readerAddChar(readerPointer, decryptedContent[charCount]);
 		if (status == NULL) {
 			free(decryptedContent);
@@ -415,7 +416,7 @@ emerald_boln readerRetract(BufferPointer const readerPointer) {
 		return EMERALD_FALSE;
 	}
 
-	if (readerPointer->position.read > 0) {
+	if (readerPointer->position.read <= 0) {
 		return EMERALD_FALSE;
 	}
 
@@ -618,7 +619,7 @@ emerald_void readerPrintStat(BufferPointer const readerPointer) {
 	emerald_intg i = 0;
 	for (i; i < NCHAR - 1; i++) {
 		if (readerPointer->histogram[i] > 0) {
-			printf("B[char]=%d, ", (emerald_char)i);
+			printf("B[%c]=%d, ", (char)i, readerPointer->histogram[i]);
 		}
 	}
 }
@@ -665,6 +666,7 @@ emerald_intg readerChecksum(BufferPointer readerPointer) {
 	}
 
 	emerald_intg checkSum = sum & 0xFF;
+	readerPointer->checkSum = checkSum;
 
 	return checkSum;
 }

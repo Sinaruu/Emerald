@@ -80,6 +80,9 @@
 #define READER_DEFAULT_SIZE		100			/* default initial buffer reader capacity */
 #define READER_DEFAULT_FACTOR	0.5f		/* default factor */
 
+#define READER_ASCII_START		0
+#define READER_ASCII_END		127
+
 /* TO_DO: Add your bit-masks constant definitions here */
 /* ! Not to be used ! */
 /*
