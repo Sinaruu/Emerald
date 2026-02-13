@@ -131,7 +131,7 @@ typedef struct bufferReader {
 /* FUNCTIONS DECLARATION:  .................................. */
 
 /* General Operations */
-BufferPointer	readerCreate(sofia_intg, sofia_real);
+BufferPointer	readerCreate(emerald_intg, emerald_real);
 BufferPointer	readerAddChar(BufferPointer const, emerald_char);
 emerald_boln		readerClear(BufferPointer const);
 emerald_boln		readerFree(BufferPointer const);
