@@ -81,6 +81,7 @@
 #define READER_DEFAULT_FACTOR	0.5f		/* default factor */
 
 /* TO_DO: Add your bit-masks constant definitions here */
+/* ! Not to be used ! */
 /*
 // BITS                             (    76543210)
 #define READER_DEFAULT_FLAG 0x00 	// (0b00000000) = (0x00)_16 = (000)_10
