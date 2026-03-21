@@ -2,30 +2,30 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Summer, 2025
-* Author: TO_DO
+* Author: Egor Kivilev, Hoang Thien Loc Ngyuen
 * Professors: Paulo Sousa
 ************************************************************
 #
 # ECHO "=---------------------------------------="
 # ECHO "|  COMPILERS - ALGONQUIN COLLEGE (S25)  |"
 # ECHO "=---------------------------------------="
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@           %&@@@@@@@@@@@     @@    ”
-# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ”
-# ECHO "    @@      @& @   @ @       @     @@    ”
-# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ”
-# ECHO "    @@      & @ @  @@              @@    ”
-# ECHO "    @@       @/ @*@ @ @   @        @@    ”
-# ECHO "    @@           @@@@  @@ @ @      @@    ”
-# ECHO "    @@            /@@    @@@ @     @@    ”
-# ECHO "    @@     @      / /     @@ @     @@    ”
-# ECHO "    @@     @ @@   /@/   @@@ @      @@    ”
-# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@         S O F I A           @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    "
+# ECHO "    @@    *                    *   @@    "
+# ECHO "    @@         @@@@@@@@@@          @@    "
+# ECHO "    @@       @@@@      @@@@        @@    "
+# ECHO "    @@      @@@          @@@       @@    "
+# ECHO "    @@      @@            @@       @@    "
+# ECHO "    @@      @@@@@@@@@@@@@@         @@    "
+# ECHO "    @@      @@@@@@@@@@@@           @@    "
+# ECHO "    @@      @@                     @@    "
+# ECHO "    @@      @@@          @@@       @@    "
+# ECHO "    @@       @@@        @@@        @@    "
+# ECHO "    @@        @@@@@@@@@@@@         @@    "
+# ECHO "    @@          @@@@@@@@           @@    "
+# ECHO "    @@       ~~~~~~~~~~~~~~~       @@    "
+# ECHO "    @@        E M E R A L D        @@    "
+# ECHO "    @@    *                    *   @@    "
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    "
 # ECHO "                                         "
 # ECHO "[READER SCRIPT .........................]"
 # ECHO "                                         "
@@ -42,14 +42,6 @@
 * Purpose: This file is the main code for Buffer/Reader (A12)
 ************************************************************
 */
-
-/*
- *.............................................................................
- * MAIN ADVICE:
- * - Please check the "TODO" labels to develop your activity.
- * - Review the functions to use "Defensive Programming".
- *.............................................................................
- */
 
 #include <ctype.h>
 #include <string.h>
@@ -80,31 +72,59 @@
 *   mode = operational mode
 * Return value: bPointer (pointer to reader)
 * Algorithm: Allocation of memory according to inicial (default) values.
-* TODO ......................................................
-*	- Adjust datatypes for your LANGUAGE.
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Check flags.
 *************************************************************
 */
 
 BufferPointer readerCreate(emerald_intg size, emerald_real factor) {
 	BufferPointer readerPointer = NULL;
-	/* TO_DO: Defensive programming: size */
-	/* TO_DO: readerPointer allocation */
-	/* TO_DO: Defensive programming: readerPointer */
-	readerPointer = calloc(1, sizeof(Buffer));
-	/* TO_DO: content allocation */
-	emerald_strg content = malloc(size);
-	if (readerPointer!=NULL && content!=NULL) {
-		readerPointer->content = content;
+
+	// Defensive programming: validate size
+	if (size < 0 || size > READER_MAX_SIZE) {
+		size = READER_DEFAULT_SIZE;
 	}
-	/* TO_DO: Defensive programming: content */
-	/* TO_DO: Initialize the histogram */
-	/* TO_DO: Initialize errors */
-	/* TO_DO: Update the properties */
-	/* TO_DO: Initialize flags */
-	/* TO_DO: The created flag must be signalized as EMP */
+
+	// Defensive programming: validate factor
+	if (factor < 0) {
+		factor = READER_DEFAULT_FACTOR;
+	}
+
+	// Allocate reader structure
+	readerPointer = (BufferPointer)calloc(1, sizeof(Buffer));
+	if (readerPointer == NULL) {
+		return NULL;
+	}
+
+	// Allocate content buffer
+	readerPointer->content = (emerald_strg)malloc(size);
+	if (readerPointer->content == NULL) {
+		free(readerPointer);  // Clean up before returning
+		return NULL;
+	}
+
+	// Initialize size and factor
+	readerPointer->size = size;
+	readerPointer->factor = factor;
+
+	// Initialize positions
+	readerPointer->position.wrte = 0;
+	readerPointer->position.read = 0;
+	readerPointer->position.mark = 0;
+
+	// Initialize flags
+	readerPointer->flags.isEmpty = EMERALD_TRUE;  // Buffer starts empty
+	readerPointer->flags.isFull = EMERALD_FALSE;
+	readerPointer->flags.isRead = EMERALD_FALSE;
+	readerPointer->flags.isMoved = EMERALD_FALSE;
+
+	// Initialize histogram
+	for (emerald_intg i = 0; i < NCHAR; i++) {
+		readerPointer->histogram[i] = 0;
+	}
+
+	// Initialize error counter and checksum
+	readerPointer->numReaderErrors = 0;
+	readerPointer->checkSum = 0;
+
 	return readerPointer;
 }
 
@@ -118,28 +138,58 @@ BufferPointer readerCreate(emerald_intg size, emerald_real factor) {
 *   ch = char to be added
 * Return value:
 *	readerPointer (pointer to Buffer Reader)
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 
 BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) {
 	emerald_strg tempReader = NULL;
 	emerald_intg newSize = 0;
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Test the inclusion of chars */
-	if (readerPointer->position.wrte * (emerald_intg)sizeof(emerald_char) < readerPointer->size) {
-		/* TO_DO: Buffer not full: set flag */
+	if (readerPointer == NULL) {
+		printf("No pointer data to add character.");
+		return NULL;
+	}
+
+	if (ch < READER_ASCII_START || ch > READER_ASCII_END) {
+		readerPointer->numReaderErrors++;
+		return NULL;
+	}
+
+	if (readerPointer->position.wrte < readerPointer->size) {
+		readerPointer->flags.isFull = EMERALD_FALSE;
+		readerPointer->flags.isEmpty = EMERALD_FALSE;
 	}
 	else {
-		/* TO_DO: Reset Full flag */
-		/* TO_DO: Adjust the size to be duplicated */
-		/* TO_DO: Defensive programming */
+		readerPointer->flags.isFull = EMERALD_TRUE;
+
+		emerald_real ratio = 1.0f + readerPointer->factor;
+		emerald_intg newSize = (emerald_intg)(readerPointer->size * ratio);
+
+		if (newSize <= 0 || newSize > READER_MAX_SIZE) {
+			readerPointer->numReaderErrors++;
+			return NULL;
+		}
+
+		tempReader = realloc(readerPointer->content, newSize);
+
+		if (tempReader == NULL) {
+			readerPointer->numReaderErrors++;
+			return NULL;
+		}
+
+		if (tempReader != readerPointer->content) {
+			readerPointer->flags.isMoved = EMERALD_TRUE;
+		}
+		readerPointer->content = tempReader;
+		readerPointer->size = newSize;
+		readerPointer->flags.isFull = EMERALD_FALSE;
 	}
-	/* TO_DO: Add the char */
-	/* TO_DO: Updates histogram */
+
+	readerPointer->content[readerPointer->position.wrte] = ch;
+	readerPointer->position.wrte++;
+
+	if (ch >= READER_ASCII_START && ch <= READER_ASCII_END) {
+		readerPointer->histogram[(int)ch]++;
+	}
 	return readerPointer;
 }
 
@@ -151,17 +201,25 @@ BufferPointer readerAddChar(BufferPointer const readerPointer, emerald_char ch) 
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerClear(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Adjust positions to zero */
-	/* TO_DO: Adjust flags original */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		printf("No pointer data to clear.");
+			return EMERALD_FALSE;
+	}
+
+	readerPointer->position.wrte = 0;
+	readerPointer->position.read = 0;
+	readerPointer->position.mark = 0;
+
+	readerPointer->flags.isEmpty = EMERALD_TRUE;
+	readerPointer->flags.isFull = EMERALD_FALSE;
+	readerPointer->flags.isRead = EMERALD_FALSE;
+	readerPointer->flags.isMoved = EMERALD_FALSE;
+	
+
+	return EMERALD_TRUE;
 }
 
 /*
@@ -172,16 +230,17 @@ emerald_boln readerClear(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerFree(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* Free memory (buffer/content) */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	free(readerPointer->content);
+	free(readerPointer);
+
+	return EMERALD_TRUE;
 }
 
 /*
@@ -192,16 +251,14 @@ emerald_boln readerFree(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerIsFull(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Check flag if buffer is FUL */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	return readerPointer->flags.isFull;
 }
 
 
@@ -213,16 +270,14 @@ emerald_boln readerIsFull(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerIsEmpty(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Check flag if buffer is EMP */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	return readerPointer->flags.isEmpty;
 }
 
 /*
@@ -234,16 +289,19 @@ emerald_boln readerIsEmpty(BufferPointer const readerPointer) {
 *   mark = mark position for char
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerSetMark(BufferPointer const readerPointer, emerald_intg mark) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Adjust mark */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	if (!(mark >= 0 && mark <= readerPointer->position.wrte)) {
+		return EMERALD_FALSE;
+	}
+	readerPointer->position.mark = mark;
+
+	return EMERALD_TRUE;
 }
 
 
@@ -255,16 +313,27 @@ emerald_boln readerSetMark(BufferPointer const readerPointer, emerald_intg mark)
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Number of chars printed.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerPrint(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming (including invalid chars) */
-	/* TO_DO: Print the buffer content */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	emerald_intg charCount = 0;
+	emerald_intg currentPosition = readerPointer->position.read;
+
+	readerRecover(readerPointer);
+
+	while (!readerPointer->flags.isRead) {
+		emerald_char ch = readerGetChar(readerPointer);
+		printf("%c", ch);
+		charCount++;
+	}
+
+	readerPointer->position.read = currentPosition;
+
+	return charCount;
 }
 
 /*
@@ -277,17 +346,37 @@ emerald_intg readerPrint(BufferPointer const readerPointer) {
 *   fileDescriptor = pointer to file descriptor
 * Return value:
 *	Number of chars read and put in buffer.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerLoad(BufferPointer const readerPointer, emerald_strg fileName) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Loads the file */
-	/* TO_DO: Creates the string calling vigenereMem(fileName, STR_LANGNAME, DECYPHER) */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	if (fileName == NULL) {
+		return READER_ERROR;
+	}
+
+	emerald_strg decryptedContent = vigenereMem(fileName, STR_LANGNAME, DECYPHER);
+
+	if (decryptedContent == NULL) {
+		return READER_ERROR;
+	}
+
+	emerald_intg charCount = 0;
+
+	while (decryptedContent[charCount] != '\0') {
+		BufferPointer status = readerAddChar(readerPointer, decryptedContent[charCount]);
+		if (status == NULL) {
+			free(decryptedContent);
+			return READER_ERROR;
+		}
+
+		charCount++;
+	}
+
+	free(decryptedContent);
+	return charCount;
 }
 
 /*
@@ -298,16 +387,17 @@ emerald_intg readerLoad(BufferPointer const readerPointer, emerald_strg fileName
 *   readerPointer = pointer to Buffer Reader
 * Return value
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerRecover(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Adjust read and mark to zero */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	readerPointer->position.mark = 0;
+	readerPointer->position.read = 0;
+
+	return EMERALD_TRUE;
 }
 
 
@@ -319,16 +409,20 @@ emerald_boln readerRecover(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerRetract(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Retract (return 1 pos read) */
-	return EMERALD_FALSE;
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	if (readerPointer->position.read <= 0) {
+		return EMERALD_FALSE;
+	}
+
+	readerPointer->position.read -= 1;
+
+	return EMERALD_TRUE;
 }
 
 
@@ -340,15 +434,15 @@ emerald_boln readerRetract(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_boln readerRestore(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Restore read to mark */
+	if (readerPointer == NULL) {
+		return EMERALD_FALSE;
+	}
+
+	readerPointer->position.read = readerPointer->position.mark;
+
 	return EMERALD_TRUE;
 }
 
@@ -362,16 +456,24 @@ emerald_boln readerRestore(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Char in the getC position.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_char readerGetChar(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Returns size in the read position and updates read */
-	return '\0';
+	if (readerPointer == NULL) {
+		return READER_TERMINATOR;
+	}
+
+	if (readerPointer->position.read >= readerPointer->position.wrte) {
+		readerPointer->flags.isRead = EMERALD_TRUE;
+		return READER_TERMINATOR;
+	}
+
+	readerPointer->flags.isRead = EMERALD_FALSE;
+
+	emerald_char ch = readerPointer->content[readerPointer->position.read];
+	readerPointer->position.read++;
+
+	return ch;
 }
 
 
@@ -384,16 +486,18 @@ emerald_char readerGetChar(BufferPointer const readerPointer) {
 *   pos = position to get the pointer
 * Return value:
 *	Position of string char.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_strg readerGetContent(BufferPointer const readerPointer, emerald_intg pos) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return content (string) */
-	return NULL;
+	if (readerPointer == NULL) {
+		return NULL;
+	}
+
+	if (!(pos >= 0 && pos < readerPointer->position.wrte)) {
+		return NULL;
+	}
+
+	return &(readerPointer->content[pos]);
 }
 
 /*
@@ -404,16 +508,14 @@ emerald_strg readerGetContent(BufferPointer const readerPointer, emerald_intg po
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	The read position offset.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerGetPosRead(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return read */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	return readerPointer->position.read;
 }
 
 
@@ -425,16 +527,14 @@ emerald_intg readerGetPosRead(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Write position
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerGetPosWrte(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return wrte */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	return readerPointer->position.wrte;
 }
 
 
@@ -446,16 +546,14 @@ emerald_intg readerGetPosWrte(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Mark position.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerGetPosMark(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return mark */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	return readerPointer->position.mark;
 }
 
 
@@ -467,16 +565,14 @@ emerald_intg readerGetPosMark(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Size of buffer.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerGetSize(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return size */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	return readerPointer->size;
 }
 
 /*
@@ -487,20 +583,20 @@ emerald_intg readerGetSize(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Flags from Buffer.
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 #define FLAGS_
 #undef FLAGS_
 #ifndef FLAGS_
 emerald_void readerPrintFlags(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	if (!readerPointer)
+	if (readerPointer == NULL) {
 		return;
-	/* TO_DO: Return flags */
+	}
+
+	printf("Flag.isEmpty = %d\n", readerPointer->flags.isEmpty);
+	printf("Flag.isFull = %d\n", readerPointer->flags.isFull);
+	printf("Flag.isMoved = %d\n", readerPointer->flags.isMoved);
+	printf("Flag.isRead = %d\n", readerPointer->flags.isRead);
 }
 #else
 #define bGetFlags(readerPointer) ((readerPointer)?(readerPointer->flags):(RT_FAIL_1))
@@ -513,14 +609,19 @@ emerald_void readerPrintFlags(BufferPointer const readerPointer) {
 * Parameters:
 *   readerPointer = pointer to Buffer Reader
 * Return value: (Void)
-* TO_DO:
-*   - Use defensive programming
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_void readerPrintStat(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Print statistics */
+	if (readerPointer == NULL) {
+		return;
+	}
+
+	emerald_intg i = 0;
+	for (i; i < NCHAR - 1; i++) {
+		if (readerPointer->histogram[i] > 0) {
+			printf("B[%c]=%d, ", (char)i, readerPointer->histogram[i]);
+		}
+	}
 }
 
 /*
@@ -531,15 +632,14 @@ emerald_void readerPrintStat(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	Number of errors.
-* TO_DO:
-*   - Use defensive programming
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 emerald_intg readerNumErrors(BufferPointer const readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return the number of errors */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	return readerPointer->numReaderErrors;
 }
 
 /*
@@ -550,15 +650,23 @@ emerald_intg readerNumErrors(BufferPointer const readerPointer) {
 *   readerPointer = pointer to Buffer Reader
 * Return value:
 *	[None]
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 
 emerald_intg readerChecksum(BufferPointer readerPointer) {
-	/* TO_DO: Defensive programming */
-	/* TO_DO: Return the checksum (given by the content) */
-	return 0;
+	if (readerPointer == NULL) {
+		return READER_ERROR;
+	}
+
+	emerald_intg sum = 0;
+	emerald_intg i = 0;
+
+	for (i; i < readerPointer->position.wrte; i++) {
+		sum += readerPointer->content[i];
+	}
+
+	emerald_intg checkSum = sum & 0xFF;
+	readerPointer->checkSum = checkSum;
+
+	return checkSum;
 }

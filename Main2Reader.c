@@ -2,30 +2,30 @@
 ************************************************************
 * COMPILERS COURSE - Algonquin College
 * Code version: Fall, 2025
-* Author: TO_DO
+* Author: Egor Kivilev, Hoang Thien Loc Ngyuen
 * Professors: Paulo Sousa
 ************************************************************
 #
 # ECHO "=---------------------------------------="
 # ECHO "|  COMPILERS - ALGONQUIN COLLEGE (S25)  |"
 # ECHO "=---------------------------------------="
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@           %&@@@@@@@@@@@     @@    ”
-# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ”
-# ECHO "    @@      @& @   @ @       @     @@    ”
-# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ”
-# ECHO "    @@      & @ @  @@              @@    ”
-# ECHO "    @@       @/ @*@ @ @   @        @@    ”
-# ECHO "    @@           @@@@  @@ @ @      @@    ”
-# ECHO "    @@            /@@    @@@ @     @@    ”
-# ECHO "    @@     @      / /     @@ @     @@    ”
-# ECHO "    @@     @ @@   /@/   @@@ @      @@    ”
-# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@         S O F I A           @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    "
+# ECHO "    @@    *                    *   @@    "
+# ECHO "    @@         @@@@@@@@@@          @@    "
+# ECHO "    @@       @@@@      @@@@        @@    "
+# ECHO "    @@      @@@          @@@       @@    "
+# ECHO "    @@      @@            @@       @@    "
+# ECHO "    @@      @@@@@@@@@@@@@@         @@    "
+# ECHO "    @@      @@@@@@@@@@@@           @@    "
+# ECHO "    @@      @@                     @@    "
+# ECHO "    @@      @@@          @@@       @@    "
+# ECHO "    @@       @@@        @@@        @@    "
+# ECHO "    @@        @@@@@@@@@@@@         @@    "
+# ECHO "    @@          @@@@@@@@           @@    "
+# ECHO "    @@       ~~~~~~~~~~~~~~~       @@    "
+# ECHO "    @@        E M E R A L D        @@    "
+# ECHO "    @@    *                    *   @@    "
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    "
 # ECHO "                                         "
 # ECHO "[READER SCRIPT .........................]"
 # ECHO "                                         "
@@ -110,8 +110,7 @@ emerald_void startReader(emerald_strg, emerald_strg, emerald_intg, emerald_real)
 ************************************************************
 */
 
-emerald_intg main2Reader(emerald_intg argc, emerald_intg* argv) {
-
+emerald_intg main2Reader(emerald_intg argc, emerald_strg* argv) {
 	/* Create source input buffer */
 	emerald_strg program = argv[0];
 	emerald_strg input = argv[2];
@@ -143,10 +142,10 @@ emerald_intg main2Reader(emerald_intg argc, emerald_intg* argv) {
 *	- Increment: buffer increment.
 ************************************************************
 */
-sofia_void startReader(sofia_strg program, sofia_strg input, sofia_intg size, sofia_real factor) {
+emerald_void startReader(emerald_strg program, emerald_strg input, emerald_intg size, emerald_real factor) {
 
 	BufferPointer bufferp;		/* pointer to Buffer structure */
-	sofia_intg loadSize = 0;	/* the size of the file loaded in the buffer */
+	emerald_intg loadSize = 0;	/* the size of the file loaded in the buffer */
 
 	/* Create buffer */
 	bufferp = readerCreate(READER_DEFAULT_SIZE, READER_DEFAULT_FACTOR);
@@ -194,9 +193,9 @@ sofia_void startReader(sofia_strg program, sofia_strg input, sofia_intg size, so
 ************************************************************
 */
 
-sofia_long getFileSize(sofia_strg fname) {
+emerald_long getFileSize(emerald_strg fname) {
 	FILE* input;
-	sofia_long flength;
+	emerald_long flength;
 	input = fopen(fname, "r");
 	if (input == NULL) {
 		errorPrint("%s%s", "Cannot open file: ", fname);
@@ -218,8 +217,8 @@ sofia_long getFileSize(sofia_strg fname) {
 ************************************************************
 */
 
-sofia_intg isNumber(const sofia_strg ns) {
-	sofia_char c; sofia_intg i = 0;
+emerald_intg isNumber(const emerald_strg ns) {
+	emerald_char c; emerald_intg i = 0;
 	if (ns == NULL) return 0;
 	while ((c = ns[i++]) == 0) {
 		if (!isdigit(c)) return 0;
@@ -234,7 +233,7 @@ sofia_intg isNumber(const sofia_strg ns) {
 *	- Params: buffer to print all properties.
 ************************************************************
 */
-sofia_void displayBuffer(BufferPointer ptr_Buffer) {
+emerald_void displayBuffer(BufferPointer ptr_Buffer) {
 	printf("\nPrinting buffer parameters:\n\n");
 	printf("The size of the buffer is:  %d\n",
 		readerGetSize(ptr_Buffer));
