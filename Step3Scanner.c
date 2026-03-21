@@ -68,7 +68,7 @@
 #include "Compilers.h"
 #endif
 
-#ifndef BUFFER_H_
+#ifndef READER_H_
 #include "Step2Reader.h"
 #endif
 
