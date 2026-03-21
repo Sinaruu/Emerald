@@ -144,20 +144,12 @@ emerald_intg main3Scanner(emerald_intg argc, emerald_strg* argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	/* Open source file */
-	if ((fileHandler = fopen(argv[2], "r")) == NULL) {
-		printScannerError("%s%s%s", argv[0], ": Cannot open file: ", argv[2]);
-		exit(EXIT_FAILURE);
-	}
-
 	/* Load source file into input buffer  */
 	printf("Reading file %s ....Please wait\n", argv[2]);
-	loadSize = readerLoad(sourceBuffer, fileHandler);
+	loadSize = readerLoad(sourceBuffer, argv[2]);
 	if (loadSize == READER_ERROR)
 		printScannerError("%s%s", argv[0], ": Error in loading buffer.");
 
-	/* Close source file */
-	fclose(fileHandler);
 	/* Find the size of the file */
 	if (loadSize == READER_ERROR) {
 		printf("The input file %s %s\n", argv[2], "is not completely loaded.");
@@ -205,7 +197,7 @@ emerald_intg main3Scanner(emerald_intg argc, emerald_strg* argv) {
 	sourceBuffer = stringLiteralTable = NULL;
 	printScannerData(scData);
 	/* Ass2 evaluation only */
-	if (argv[3] != NULL && *argv[3] == 'l')
+	if (argc > 3 && argv[3] != NULL && *argv[3] == 'l')
 		printf("The number of lines is: %d\n", line);
 
 	return (EXIT_SUCCESS);

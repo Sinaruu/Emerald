@@ -1,11 +1,24 @@
-# Sofia Example
-  The program is "lexically" correct
-  and should not generate any error #
+# Emerald TCL-based program
+  This program is lexically correct
+  and should not generate any errors #
 int main&() {
 	data {
+		int count;
+		real ratio;
+		string label;
 	}
 	code {
-		print&("Hello world!");
-		return 0;
+		print& 'Hello from Emerald!';
+		if count then {
+			print& 'count is set';
+		}
+		while count do {
+			print& 'iterating';
+			return;
+		}
+		else {
+			print& 'done';
+		}
+		return;
 	}
 }

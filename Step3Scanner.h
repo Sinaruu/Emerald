@@ -174,26 +174,28 @@ typedef struct scannerData {
 /* TO_DO: Error states and illegal state */
 #define ESNR	8		/* Error state with no retract */
 #define ESWR	9		/* Error state with retract */
-#define FS		10		/* Illegal state */
+#define FS		12		/* Illegal state */
 
  /* TO_DO: State transition table definition */
-#define NUM_STATES		10
+#define NUM_STATES		12
 #define CHAR_CLASSES	8
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static emerald_intg transitionTable[NUM_STATES][CHAR_CLASSES] = {
 /*    [A-z],[0-9],    _,    &,   \', SEOF,    #, other
 	   L(0), D(1), U(2), M(3), Q(4), E(5), C(6),  O(7) */
-	{     1, ESNR, ESNR, ESNR,    4, ESWR,	  6, ESNR},	// S0: NOAS
-	{     1,    1,    1,    2,	  3,    3,   3,    3},	// S1: NOAS
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S2: ASNR (MVID)
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S3: ASWR (KEY)
-	{     4,    4,    4,    4,    5, ESWR,	  4,    4},	// S4: NOAS
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S5: ASNR (SL)
-	{     6,    6,    6,    6,    6, ESWR,	  7,    6},	// S6: NOAS
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S7: ASNR (COM)
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S8: ASNR (ES)
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS}  // S9: ASWR (ER)
+	{    1,   10, ESNR, ESNR,    4, ESWR,    6, ESNR},  // S0
+	{    1,    1,    1,    2,    3,    3,    3,    3},   // S1
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S2 ASNR (MNID)
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S3 ASWR (KEY)
+	{    4,    4,    4,    4,    5, ESWR,    4,    4},   // S4
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S5 ASNR (SL)
+	{    6,    6,    6,    6,    6, ESWR,    7,    6},   // S6
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S7 ASNR (COM)
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S8 ASNR (ERR1)
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S9 ASWR (ERR2)
+	{   11,   10,   11,   11,   11,   11,   11,   11},  // S10 NOAS (collecting digits)
+	{   FS,   FS,   FS,   FS,   FS,   FS,   FS,   FS},  // S11 ASWR (IL)
 };
 
 /* Define accepting states types */
@@ -212,7 +214,9 @@ static emerald_intg stateType[NUM_STATES] = {
 	NOFS, /* 06 */
 	FSNR, /* 07 (COM) */
 	FSNR, /* 08 (Err1 - no retract) */
-	FSWR  /* 09 (Err2 - retract) */
+	FSWR, /* 09 (Err2 - retract) */
+	NOFS,
+	FSWR,
 };
 
 /*
@@ -252,16 +256,18 @@ Token funcErr	(emerald_strg lexeme);
 
 /* TO_DO: Define final state table */
 static PTR_ACCFUN finalStateTable[NUM_STATES] = {
-	NULL,		/* -    [00] */
-	NULL,		/* -    [01] */
-	funcID,		/* MNID	[02] */
-	funcKEY,	/* KEY  [03] */
-	NULL,		/* -    [04] */
-	funcSL,		/* SL   [05] */
-	NULL,		/* -    [06] */
-	funcCMT,	/* COM  [07] */
-	funcErr,	/* ERR1 [06] */
-	funcErr		/* ERR2 [07] */
+	NULL,    /* 00 */
+	NULL,    /* 01 */
+	funcID,  /* 02 */
+	funcKEY, /* 03 */
+	NULL,    /* 04 */
+	funcSL,  /* 05 */
+	NULL,    /* 06 */
+	funcCMT, /* 07 */
+	funcErr, /* 08 */
+	funcErr, /* 09 */
+	NULL,    /* 10 */
+	funcIL   /* 11 */
 };
 
 /*

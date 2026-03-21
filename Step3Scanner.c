@@ -239,8 +239,10 @@ Token tokenizer(emerald_void) {
 			for (i = 0; i < lexLength; i++)
 				readerAddChar(lexemeBuffer, readerGetChar(sourceBuffer));
 			readerAddChar(lexemeBuffer, READER_TERMINATOR);
+
+			free(lexeme);
 			lexeme = readerGetContent(lexemeBuffer, 0);
-			// TO_DO: Defensive programming
+			
 			if (!lexeme)
 				return currentToken;
 			currentToken = (*finalStateTable[state])(lexeme);
@@ -545,12 +547,14 @@ emerald_void printToken(Token t) {
 	switch (t.code) {
 	case RTE_T:
 		printf("RTE_T\t\t%s", t.attribute.errLexeme);
-		/* Call here run-time error handling component */
 		if (errorNumber) {
 			printf("%d", errorNumber);
 			exit(errorNumber);
 		}
 		printf("\n");
+		break;
+	case INL_T:
+		printf("INL_T\t\t%d\n", t.attribute.intValue);
 		break;
 	case ERR_T:
 		printf("ERR_T\t\t%s\n", t.attribute.errLexeme);
@@ -602,6 +606,9 @@ emerald_void printToken(Token t) {
  */
 emerald_void printScannerData(ScannerData scData) {
 	/* Print Scanner statistics */
+	printf("----------------------------------\n");
+	printf("Number of scanner errors: %d\n", numScannerErrors);
+	printf("----------------------------------\n");
 	printf("Statistics:\n");
 	printf("----------------------------------\n");
 	int cont = 0;
@@ -611,7 +618,3 @@ emerald_void printScannerData(ScannerData scData) {
 	}
 	printf("----------------------------------\n");
 }
-
-/*
-TO_DO: (If necessary): HERE YOU WRITE YOUR ADDITIONAL FUNCTIONS (IF ANY).
-*/

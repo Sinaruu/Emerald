@@ -101,7 +101,7 @@ emerald_intg main(int argc, char** argv) {
 		main1Coder(argc, argv);
 		break;
 	case PGM_RDR:
-		printf("%s%c%s", "\n[Option '", PGM_CDR, "': Starting READER .....]\n\n");
+		printf("%s%c%s", "\n[Option '", PGM_RDR, "': Starting READER .....]\n\n");
 		main2Reader(argc, argv);
 		break;
 	case PGM_SCN:
