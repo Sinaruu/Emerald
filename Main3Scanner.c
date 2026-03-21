@@ -117,7 +117,7 @@ emerald_void printToken(Token t);
  ***********************************************************
  */
 
-emerald_intg mainScanner(emerald_intg argc, emerald_strg* argv) {
+emerald_intg main3Scanner(emerald_intg argc, emerald_strg* argv) {
 
 	BufferPointer sourceBuffer;		/* Pointer to input (source) buffer */
 	FILE* fileHandler;				/* Input file handle */
