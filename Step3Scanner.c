@@ -88,6 +88,9 @@ extern BufferPointer stringLiteralTable;	/* String literal table */
 emerald_intg line;								/* Current line number of the source code */
 extern emerald_intg errorNumber;				/* Defined in platy_st.c - run-time error number */
 
+emerald_intg numScannerErrors = 0;
+ScannerData scData;
+
 extern emerald_intg stateType[NUM_STATES];
 extern emerald_strg keywordTable[KWT_SIZE];
 

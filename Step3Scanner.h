@@ -152,20 +152,20 @@ typedef struct scannerData {
 
 /* TO_DO: Define lexeme FIXED classes */
 /* EOF definitions */
-#define EOS_CHR '\0'	// CH00
-#define EOF_CHR 0xFF	// CH01
-#define UND_CHR '_'		// CH02
-#define AMP_CHR '&'		// CH03
-#define QUT_CHR '\''	// CH04
-#define HST_CHR '#'		// CH05
-#define TAB_CHR '\t'	// CH06
-#define SPC_CHR ' '		// CH07
-#define NWL_CHR '\n'	// CH08
-#define SCL_CHR ';'		// CH09
-#define LPR_CHR '('		// CH10
-#define RPR_CHR ')'		// CH11
-#define LBR_CHR '{'		// CH12
-#define RBR_CHR '}'		// CH13
+#define EOS_CHR '\0'				// CH00
+#define EOF_CHR (emerald_char)0xFF	// CH01
+#define UND_CHR '_'					// CH02
+#define AMP_CHR '&'					// CH03
+#define QUT_CHR '\''				// CH04
+#define HST_CHR '#'					// CH05
+#define TAB_CHR '\t'				// CH06
+#define SPC_CHR ' '					// CH07
+#define NWL_CHR '\n'				// CH08
+#define SCL_CHR ';'					// CH09
+#define LPR_CHR '('					// CH10
+#define RPR_CHR ')'					// CH11
+#define LBR_CHR '{'					// CH12
+#define RBR_CHR '}'					// CH13
 
 /*  Special case tokens processed separately one by one in the token-driven part of the scanner:
  *  LPR_T, RPR_T, LBR_T, RBR_T, EOS_T, SEOF_T and special chars used for tokenis include _, & and ' */
@@ -310,9 +310,9 @@ typedef struct languageAttributes {
 } LanguageAttributes;
 
 /* Number of errors */
-emerald_intg numScannerErrors;
+extern emerald_intg numScannerErrors;
 
 /* Scanner data */
-ScannerData scData;
+extern ScannerData scData;
 
 #endif
