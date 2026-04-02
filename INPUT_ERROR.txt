@@ -1,9 +1,0 @@
-# Emerald error test file
-  This file contains intentional scanner errors #
-int broken&() {
-	code {
-		print& 'unterminated string;
-		x = @@@;
-		int 99999;
-	}
-}

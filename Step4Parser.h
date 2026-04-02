@@ -93,6 +93,22 @@ enum KEYWORDS {
 	KW_return
 };
 
+enum ART_OPS {
+	OP_ADD = 0,	// "+"
+	OP_SUB,		// "-"
+	OP_MUL,		// "*"
+	OP_DIV		// "/"
+};
+
+enum REL_OPS {
+	OP_EQ = 0,	// "=="
+	OP_NEQ,		// "!="
+	OP_GT,		// ">"
+	OP_LT,		// "<"
+	OP_GTE,		// ">="
+	OP_LTE,		// "<="
+};
+
 /* TO_DO: Define the number of BNF rules */
 #define NUM_BNF_RULES 14
 
