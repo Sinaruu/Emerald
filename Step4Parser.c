@@ -27,24 +27,22 @@
 # ECHO "    @@    *                    *   @@    "
 # ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    "
 # ECHO "                                         "
-# ECHO "[CODER SCRIPT ..........................]"
+# ECHO "[PARSER SCRIPT .........................]"
 # ECHO "                                         "
 */
 
-
 /*
 ************************************************************
-* File name: Parser.c
+* File name: Step4Parser.c
 * Compiler: MS Visual Studio 2022
-* Course: CST 8152 – Compilers, Lab Section: [011, 012]
+* Course: CST 8152 - Compilers, Lab Section: [011, 012]
 * Assignment: A32.
-* Date: May 01 2023
-* Purpose: This file contains all functionalities from Parser.
-* Function list: (...).
+* Date: Jan 01 2025
+* Professor: Paulo Sousa
+* Purpose: This file contains all functionalities for the
+*           Emerald language Parser (syntax analyzer).
 ************************************************************
 */
-
-/* TO_DO: Adjust the function header */
 
 #ifndef COMPILERS_H_
 #include "Compilers.h"
@@ -58,23 +56,26 @@
 #include "Step4Parser.h"
 #endif
 
+/* Actual variable definitions for globals declared extern in header */
+emerald_intg numParserErrors = 0;
+ParserData psData;
+
 /* Parser data */
 extern ParserData psData; /* BNF statistics */
 
 /*
-************************************************************
- * Process Parser
+ ************************************************************
+ * startParser
+ * Purpose: Entry point for the parser. Initializes histogram,
+ *          reads the first token, and starts the program rule.
+ * BNF: <program> -> ...
  ***********************************************************
  */
-/* TO_DO: This is the function to start the parser - check your program definition */
-
 emerald_void startParser() {
-	/* TO_DO: Initialize Parser data */
 	emerald_intg i = 0;
 	for (i = 0; i < NUM_BNF_RULES; i++) {
 		psData.parsHistogram[i] = 0;
 	}
-	/* Proceed parser */
 	lookahead = tokenizer();
 	if (lookahead.code != SEOF_T) {
 		program();
@@ -83,22 +84,25 @@ emerald_void startParser() {
 	printf("%s%s\n", STR_LANGNAME, ": Source file parsed");
 }
 
-
 /*
  ************************************************************
- * Match Token
+ * matchToken
+ * Purpose: Matches the current lookahead token against the
+ *          expected token code (and attribute for keywords).
+ *          Calls syncErrorHandler on mismatch.
  ***********************************************************
  */
-/* TO_DO: This is the main code for match - check your definition */
 emerald_void matchToken(emerald_intg tokenCode, emerald_intg tokenAttribute) {
 	emerald_intg matchFlag = 1;
 	switch (lookahead.code) {
 	case KW_T:
 		if (lookahead.attribute.codeType != tokenAttribute)
 			matchFlag = 0;
+		break;
 	default:
 		if (lookahead.code != tokenCode)
 			matchFlag = 0;
+		break;
 	}
 	if (matchFlag && lookahead.code == SEOF_T)
 		return;
@@ -110,16 +114,18 @@ emerald_void matchToken(emerald_intg tokenCode, emerald_intg tokenAttribute) {
 			syntaxErrorNumber++;
 		}
 	}
-	else
+	else {
 		syncErrorHandler(tokenCode);
+	}
 }
 
 /*
  ************************************************************
- * Syncronize Error Handler
+ * syncErrorHandler
+ * Purpose: Panic-mode error recovery. Advances tokens until
+ *          the synchronization token is found.
  ***********************************************************
  */
-/* TO_DO: This is the function to handler error - adjust basically datatypes */
 emerald_void syncErrorHandler(emerald_intg syncTokenCode) {
 	printError();
 	syntaxErrorNumber++;
@@ -134,12 +140,13 @@ emerald_void syncErrorHandler(emerald_intg syncTokenCode) {
 
 /*
  ************************************************************
- * Print Error
+ * printError
+ * Purpose: Prints a descriptive syntax error message for
+ *          the current lookahead token.
  ***********************************************************
  */
-/* TO_DO: This is the function to error printing - adjust basically datatypes */
 emerald_void printError() {
-	extern numParserErrors;			/* link to number of errors (defined in Parser.h) */
+	extern emerald_intg numParserErrors;
 	Token t = lookahead;
 	printf("%s%s%3d\n", STR_LANGNAME, ": Syntax error:  Line:", line);
 	printf("*****  Token code:%3d Attribute: ", t.code);
@@ -172,29 +179,56 @@ emerald_void printError() {
 		printf("RBR_T\n");
 		break;
 	case EOS_T:
-		printf("NA\n");
+		printf("EOS_T (;)\n");
+		break;
+	case INL_T:
+		printf("INL_T: %d\n", t.attribute.intValue);
 		break;
 	default:
 		printf("%s%s%d\n", STR_LANGNAME, ": Scanner error: invalid token code: ", t.code);
-		numParserErrors++; // Updated parser error
+		numParserErrors++;
 	}
 }
 
 /*
  ************************************************************
- * Program statement
- * BNF: <program> -> main& { <opt_statements> }
- * FIRST(<program>)= {CMT_T, MNID_T (main&), SEOF_T}.
+ * program
+ * BNF: <program> -> [<comment>] int main&() { <dataSession> <codeSession> }
+ * FIRST(<program>) = { CMT_T, KW_T(KW_int), MNID_T(main&), SEOF_T }
  ***********************************************************
  */
 emerald_void program() {
 	psData.parsHistogram[BNF_program]++;
-	switch (lookahead.code) {
-	case CMT_T:
+	/* optional leading comment */
+	while (lookahead.code == CMT_T) {
 		comment();
+	}
+	switch (lookahead.code) {
 	case KW_T:
-		matchToken(KW_T, KW_int);
+		if (lookahead.attribute.codeType == KW_int) {
+			matchToken(KW_T, KW_int);
+			/* now expect main&() */
+			if (lookahead.code == MNID_T &&
+				strncmp(lookahead.attribute.idLexeme, LANG_MAIN, 5) == 0) {
+				matchToken(MNID_T, NO_ATTR);
+				matchToken(LPR_T, NO_ATTR);
+				optParams();
+				matchToken(RPR_T, NO_ATTR);
+				matchToken(LBR_T, NO_ATTR);
+				dataSession();
+				codeSession();
+				matchToken(RBR_T, NO_ATTR);
+			}
+			else {
+				printError();
+			}
+			break;
+		}
+		/* fall through if not KW_int */
+		printError();
+		break;
 	case MNID_T:
+		/* allow main& without explicit int keyword (looser mode) */
 		if (strncmp(lookahead.attribute.idLexeme, LANG_MAIN, 5) == 0) {
 			matchToken(MNID_T, NO_ATTR);
 			matchToken(LPR_T, NO_ATTR);
@@ -206,14 +240,14 @@ emerald_void program() {
 			matchToken(RBR_T, NO_ATTR);
 			break;
 		}
-		else {
-			printError();
-		}
+		printError();
+		break;
 	case SEOF_T:
-		; // Empty
+		; /* empty file - ok */
 		break;
 	default:
 		printError();
+		break;
 	}
 	printf("%s%s\n", STR_LANGNAME, ": Program parsed");
 }
@@ -221,8 +255,8 @@ emerald_void program() {
 /*
  ************************************************************
  * comment
- * BNF: comment
- * FIRST(<comment>)= {CMT_T}.
+ * BNF: <comment> -> CMT_T
+ * FIRST(<comment>) = { CMT_T }
  ***********************************************************
  */
 emerald_void comment() {
@@ -231,23 +265,26 @@ emerald_void comment() {
 	printf("%s%s\n", STR_LANGNAME, ": Comment parsed");
 }
 
-
 /*
  ************************************************************
  * optParams
  * BNF: <optParams> -> <paramList> | e
- * FIRST(<optParams>) = { e, KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
+ * FIRST(<optParams>) = { KW_T(KW_int|KW_real|KW_string), e }
  ***********************************************************
  */
 emerald_void optParams() {
 	psData.parsHistogram[BNF_optParams]++;
 	switch (lookahead.code) {
-	case CMT_T:
-		comment();
 	case KW_T:
-		paramList();
+		if (lookahead.attribute.codeType == KW_int ||
+			lookahead.attribute.codeType == KW_real ||
+			lookahead.attribute.codeType == KW_string) {
+			paramList();
+		}
+		break;
 	default:
-		; // Empty
+		; /* epsilon - no parameters */
+		break;
 	}
 	printf("%s%s\n", STR_LANGNAME, ": Optional param list parsed");
 }
@@ -255,13 +292,25 @@ emerald_void optParams() {
 /*
  ************************************************************
  * paramList
- * BNF: <paramList> -> <opt_varlist_declarations>
- * FIRST(<paramList>) = { KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
+ * BNF: <paramList> -> (int|real|string) MNID_T
+ * FIRST(<paramList>) = { KW_T(KW_int), KW_T(KW_real), KW_T(KW_string) }
  ***********************************************************
  */
 emerald_void paramList() {
 	psData.parsHistogram[BNF_optParams]++;
 	switch (lookahead.attribute.codeType) {
+	case KW_int:
+		matchToken(KW_T, KW_int);
+		matchToken(MNID_T, NO_ATTR);
+		break;
+	case KW_real:
+		matchToken(KW_T, KW_real);
+		matchToken(MNID_T, NO_ATTR);
+		break;
+	case KW_string:
+		matchToken(KW_T, KW_string);
+		matchToken(MNID_T, NO_ATTR);
+		break;
 	default:
 		break;
 	}
@@ -271,69 +320,138 @@ emerald_void paramList() {
 /*
  ************************************************************
  * dataSession
- * BNF: <dataSession> -> data { <opt_varlist_declarations> }
- * FIRST(<program>)= {KW_T (KW_data)}.
+ * BNF: <dataSession> -> data { <optVarListDeclarations> }
+ * FIRST(<dataSession>) = { KW_T(KW_data) }
  ***********************************************************
  */
 emerald_void dataSession() {
 	psData.parsHistogram[BNF_dataSession]++;
-	switch (lookahead.code) {
-	case CMT_T:
+	/* consume any comments before data */
+	while (lookahead.code == CMT_T) {
 		comment();
-	default:
-		matchToken(KW_T, KW_data);
-		matchToken(LBR_T, NO_ATTR);
-		optVarListDeclarations();
-		matchToken(RBR_T, NO_ATTR);
-		printf("%s%s\n", STR_LANGNAME, ": Data Session parsed");
 	}
+	matchToken(KW_T, KW_data);
+	matchToken(LBR_T, NO_ATTR);
+	optVarListDeclarations();
+	matchToken(RBR_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Data Session parsed");
 }
 
 /*
  ************************************************************
- * Optional Var List Declarations
- * BNF: <opt_varlist_declarations> -> <varlist_declarations> | e
- * FIRST(<opt_varlist_declarations>) = { e, KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
+ * optVarListDeclarations
+ * BNF: <optVarListDeclarations> -> <varListDeclarations> | e
+ * FIRST = { KW_T(KW_int|KW_real|KW_string), e }
  ***********************************************************
  */
 emerald_void optVarListDeclarations() {
 	psData.parsHistogram[BNF_optVarListDeclarations]++;
 	switch (lookahead.code) {
+	case KW_T:
+		if (lookahead.attribute.codeType == KW_int ||
+			lookahead.attribute.codeType == KW_real ||
+			lookahead.attribute.codeType == KW_string) {
+			varListDeclarations();
+		}
+		break;
 	default:
-		; // Empty
+		; /* epsilon */
+		break;
 	}
 	printf("%s%s\n", STR_LANGNAME, ": Optional Variable List Declarations parsed");
 }
 
 /*
  ************************************************************
- * codeSession statement
- * BNF: <codeSession> -> code { <opt_statements> }
- * FIRST(<codeSession>)= {KW_T (KW_code)}.
+ * varListDeclarations
+ * BNF: <varListDeclarations> -> <varDeclaration> <varListDeclarationsPrime>
+ * FIRST = { KW_T(KW_int|KW_real|KW_string) }
+ ***********************************************************
+ */
+emerald_void varListDeclarations() {
+	psData.parsHistogram[BNF_varListDeclarations]++;
+	varDeclaration();
+	varListDeclarationsPrime();
+	printf("%s%s\n", STR_LANGNAME, ": Variable List Declarations parsed");
+}
+
+/*
+ ************************************************************
+ * varListDeclarationsPrime
+ * BNF: <varListDeclarationsPrime> -> <varDeclaration> <varListDeclarationsPrime> | e
+ * FIRST = { KW_T(KW_int|KW_real|KW_string), e }
+ ***********************************************************
+ */
+emerald_void varListDeclarationsPrime() {
+	psData.parsHistogram[BNF_varListDeclarationsPrime]++;
+	switch (lookahead.code) {
+	case KW_T:
+		if (lookahead.attribute.codeType == KW_int ||
+			lookahead.attribute.codeType == KW_real ||
+			lookahead.attribute.codeType == KW_string) {
+			varDeclaration();
+			varListDeclarationsPrime();
+		}
+		break;
+	default:
+		; /* epsilon */
+		break;
+	}
+}
+
+/*
+ ************************************************************
+ * varDeclaration
+ * BNF: <varDeclaration> -> (int|real|string) MNID_T ;
+ * FIRST = { KW_T(KW_int), KW_T(KW_real), KW_T(KW_string) }
+ ***********************************************************
+ */
+emerald_void varDeclaration() {
+	psData.parsHistogram[BNF_varDeclaration]++;
+	switch (lookahead.attribute.codeType) {
+	case KW_int:
+		matchToken(KW_T, KW_int);
+		break;
+	case KW_real:
+		matchToken(KW_T, KW_real);
+		break;
+	case KW_string:
+		matchToken(KW_T, KW_string);
+		break;
+	default:
+		printError();
+		return;
+	}
+	matchToken(MNID_T, NO_ATTR);
+	matchToken(EOS_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Variable Declaration parsed");
+}
+
+/*
+ ************************************************************
+ * codeSession
+ * BNF: <codeSession> -> code { <optionalStatements> }
+ * FIRST(<codeSession>) = { KW_T(KW_code) }
  ***********************************************************
  */
 emerald_void codeSession() {
 	psData.parsHistogram[BNF_codeSession]++;
-	switch (lookahead.code) {
-	case CMT_T:
+	/* consume any comments before code */
+	while (lookahead.code == CMT_T) {
 		comment();
-	default:
-		matchToken(KW_T, KW_code);
-		matchToken(LBR_T, NO_ATTR);
-		optionalStatements();
-		matchToken(RBR_T, NO_ATTR);
-		printf("%s%s\n", STR_LANGNAME, ": Code Session parsed");
 	}
+	matchToken(KW_T, KW_code);
+	matchToken(LBR_T, NO_ATTR);
+	optionalStatements();
+	matchToken(RBR_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Code Session parsed");
 }
-
-/* TO_DO: Continue the development (all non-terminal functions) */
 
 /*
  ************************************************************
- * Optional statement
- * BNF: <opt_statements> -> <statements> | ϵ
- * FIRST(<opt_statements>) = { ϵ , IVID_T, FVID_T, SVID_T, KW_T(KW_if),
- *				KW_T(KW_while), MNID_T(print&), MNID_T(input&) }
+ * optionalStatements
+ * BNF: <optionalStatements> -> <statements> | e
+ * FIRST = { MNID_T(print&), MNID_T(input&), KW_T(KW_return), CMT_T, e }
  ***********************************************************
  */
 emerald_void optionalStatements() {
@@ -341,24 +459,31 @@ emerald_void optionalStatements() {
 	switch (lookahead.code) {
 	case CMT_T:
 		comment();
+		optionalStatements();
+		break;
+	case KW_T:
+		if (lookahead.attribute.codeType == KW_return) {
+			statements();
+		}
+		break;
 	case MNID_T:
 		if ((strncmp(lookahead.attribute.idLexeme, LANG_WRTE, 6) == 0) ||
 			(strncmp(lookahead.attribute.idLexeme, LANG_READ, 6) == 0)) {
 			statements();
-			break;
 		}
+		break;
 	default:
-		; // Empty
+		; /* epsilon */
+		break;
 	}
 	printf("%s%s\n", STR_LANGNAME, ": Optional statements parsed");
 }
 
 /*
  ************************************************************
- * Statements
- * BNF: <statements> -> <statement><statementsPrime>
- * FIRST(<statements>) = { IVID_T, FVID_T, SVID_T, KW_T(KW_if),
- *		KW_T(KW_while), MNID_T(input&), MNID_T(print&) }
+ * statements
+ * BNF: <statements> -> <statement> <statementsPrime>
+ * FIRST = { MNID_T(print&), MNID_T(input&), KW_T(KW_return) }
  ***********************************************************
  */
 emerald_void statements() {
@@ -370,10 +495,9 @@ emerald_void statements() {
 
 /*
  ************************************************************
- * Statements Prime
- * BNF: <statementsPrime> -> <statement><statementsPrime> | ϵ
- * FIRST(<statementsPrime>) = { ϵ , IVID_T, FVID_T, SVID_T, 
- *		KW_T(KW_if), KW_T(KW_while), MNID_T(input&), MNID_T(print&) }
+ * statementsPrime
+ * BNF: <statementsPrime> -> <statement> <statementsPrime> | e
+ * FIRST = { MNID_T(print&), MNID_T(input&), KW_T(KW_return), e }
  ***********************************************************
  */
 emerald_void statementsPrime() {
@@ -381,23 +505,32 @@ emerald_void statementsPrime() {
 	switch (lookahead.code) {
 	case CMT_T:
 		comment();
-	case MNID_T:
-		if (strncmp(lookahead.attribute.idLexeme, LANG_WRTE, 6) == 0) {
-			statements();
-			break;
+		statementsPrime();
+		break;
+	case KW_T:
+		if (lookahead.attribute.codeType == KW_return) {
+			statement();
+			statementsPrime();
 		}
+		break;
+	case MNID_T:
+		if ((strncmp(lookahead.attribute.idLexeme, LANG_WRTE, 6) == 0) ||
+			(strncmp(lookahead.attribute.idLexeme, LANG_READ, 6) == 0)) {
+			statement();
+			statementsPrime();
+		}
+		break;
 	default:
-		; //empty string
+		; /* epsilon */
+		break;
 	}
 }
 
 /*
  ************************************************************
- * Single statement
- * BNF: <statement> -> <assignment statement> | <selection statement> |
- *	<iteration statement> | <input statement> | <output statement>
- * FIRST(<statement>) = { IVID_T, FVID_T, SVID_T, KW_T(KW_if), KW_T(KW_while),
- *			MNID_T(input&), MNID_T(print&) }
+ * statement
+ * BNF: <statement> -> <outputStatement> | <inputStatement> | <returnStatement>
+ * FIRST = { MNID_T(print&), MNID_T(input&), KW_T(KW_return) }
  ***********************************************************
  */
 emerald_void statement() {
@@ -405,9 +538,12 @@ emerald_void statement() {
 	switch (lookahead.code) {
 	case CMT_T:
 		comment();
+		break;
 	case KW_T:
-		switch (lookahead.attribute.codeType) {
-		default:
+		if (lookahead.attribute.codeType == KW_return) {
+			returnStatement();
+		}
+		else {
 			printError();
 		}
 		break;
@@ -415,18 +551,25 @@ emerald_void statement() {
 		if (strncmp(lookahead.attribute.idLexeme, LANG_WRTE, 6) == 0) {
 			outputStatement();
 		}
+		else if (strncmp(lookahead.attribute.idLexeme, LANG_READ, 6) == 0) {
+			inputStatement();
+		}
+		else {
+			printError();
+		}
 		break;
 	default:
 		printError();
+		break;
 	}
 	printf("%s%s\n", STR_LANGNAME, ": Statement parsed");
 }
 
 /*
  ************************************************************
- * Output Statement
- * BNF: <output statement> -> print& (<output statementPrime>);
- * FIRST(<output statement>) = { MNID_T(print&) }
+ * outputStatement
+ * BNF: <outputStatement> -> print&( <outputVariableList> );
+ * FIRST(<outputStatement>) = { MNID_T(print&) }
  ***********************************************************
  */
 emerald_void outputStatement() {
@@ -441,9 +584,9 @@ emerald_void outputStatement() {
 
 /*
  ************************************************************
- * Output Variable List
- * BNF: <opt_variable list> -> <variable list> | ϵ
- * FIRST(<opt_variable_list>) = { IVID_T, FVID_T, SVID_T, ϵ }
+ * outputVariableList
+ * BNF: <outputVariableList> -> STR_T | <arithmeticExpression> | e
+ * FIRST = { STR_T, INL_T, MNID_T, LPR_T, e }
  ***********************************************************
  */
 emerald_void outputVariableList() {
@@ -452,25 +595,209 @@ emerald_void outputVariableList() {
 	case STR_T:
 		matchToken(STR_T, NO_ATTR);
 		break;
+	case INL_T:
+	case LPR_T:
+		arithmeticExpression();
+		break;
+	case MNID_T:
+		/* identifier used as a variable in expression */
+		arithmeticExpression();
+		break;
 	default:
-		;
+		; /* epsilon - empty argument list */
+		break;
 	}
 	printf("%s%s\n", STR_LANGNAME, ": Output variable list parsed");
 }
 
 /*
  ************************************************************
- * The function prints statistics of BNF rules
- * Param:
- *	- Parser data
- * Return:
- *	- Void (procedure)
+ * inputStatement
+ * BNF: <inputStatement> -> input&( <inputVariableList> );
+ * FIRST(<inputStatement>) = { MNID_T(input&) }
  ***********************************************************
  */
+emerald_void inputStatement() {
+	psData.parsHistogram[BNF_inputStatement]++;
+	matchToken(MNID_T, NO_ATTR);
+	matchToken(LPR_T, NO_ATTR);
+	inputVariableList();
+	matchToken(RPR_T, NO_ATTR);
+	matchToken(EOS_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Input statement parsed");
+}
+
+/*
+ ************************************************************
+ * inputVariableList
+ * BNF: <inputVariableList> -> MNID_T | e
+ * FIRST = { MNID_T, e }
+ ***********************************************************
+ */
+emerald_void inputVariableList() {
+	psData.parsHistogram[BNF_inputVariableList]++;
+	switch (lookahead.code) {
+	case MNID_T:
+		matchToken(MNID_T, NO_ATTR);
+		break;
+	default:
+		; /* epsilon */
+		break;
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Input variable list parsed");
+}
+
+/*
+ ************************************************************
+ * returnStatement
+ * BNF: <returnStatement> -> return <optReturnExpr> ;
+ * FIRST(<returnStatement>) = { KW_T(KW_return) }
+ ***********************************************************
+ */
+emerald_void returnStatement() {
+	psData.parsHistogram[BNF_returnStatement]++;
+	matchToken(KW_T, KW_return);
+	optReturnExpr();
+	matchToken(EOS_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Return statement parsed");
+}
+
+/*
+ ************************************************************
+ * optReturnExpr
+ * BNF: <optReturnExpr> -> <arithmeticExpression> | e
+ * FIRST = { INL_T, MNID_T, LPR_T, e }
+ ***********************************************************
+ */
+emerald_void optReturnExpr() {
+	switch (lookahead.code) {
+	case INL_T:
+	case LPR_T:
+		arithmeticExpression();
+		break;
+	case MNID_T:
+		arithmeticExpression();
+		break;
+	default:
+		; /* epsilon - return nothing */
+		break;
+	}
+}
+
+/*
+ ************************************************************
+ * arithmeticExpression
+ * BNF: <arithmeticExpression> -> <term> <arithmeticExpressionPrime>
+ * FIRST = { INL_T, MNID_T, LPR_T }
+ ***********************************************************
+ */
+emerald_void arithmeticExpression() {
+	psData.parsHistogram[BNF_arithmeticExpression]++;
+	term();
+	arithmeticExpressionPrime();
+	printf("%s%s\n", STR_LANGNAME, ": Arithmetic expression parsed");
+}
+
+/*
+ ************************************************************
+ * arithmeticExpressionPrime
+ * BNF: <arithmeticExpressionPrime>
+ *          -> + <term> <arithmeticExpressionPrime>
+ *           | - <term> <arithmeticExpressionPrime>
+ *           | e
+ *
+ * NOTE: The scanner does not produce a dedicated ADD/SUB token.
+ * Arithmetic operators (+, -, *, /) appear inside identifiers
+ * or integer literals in some grammars.  In this scanner design,
+ * unrecognized single characters produce ERR_T.  We treat the
+ * absence of a continuation as the epsilon case so that any
+ * arithmetic token that the scanner DOES produce (e.g. as part
+ * of an extended lexeme) falls through naturally.
+ *
+ * FIRST = { e }  (epsilon only in this scanner configuration)
+ ***********************************************************
+ */
+emerald_void arithmeticExpressionPrime() {
+	psData.parsHistogram[BNF_arithmeticExpressionPrime]++;
+	/*
+	 * The Emerald scanner (Step3Scanner) does not define token
+	 * codes for +, -, *, or /.  Those characters produce ERR_T.
+	 * We therefore implement epsilon here and leave extension
+	 * to a future scanner update that adds OP_T.
+	 *
+	 * If the scanner is extended with an operator token (OP_T),
+	 * replace this body with:
+	 *
+	 *   if (lookahead.code == OP_T &&
+	 *       (lookahead.attribute.arithmeticOperator == OP_ADD ||
+	 *        lookahead.attribute.arithmeticOperator == OP_SUB)) {
+	 *       matchToken(OP_T, NO_ATTR);
+	 *       term();
+	 *       arithmeticExpressionPrime();
+	 *   }
+	 */
+	; /* epsilon */
+}
+
+/*
+ ************************************************************
+ * term
+ * BNF: <term> -> <factor> <termPrime>
+ * FIRST = { INL_T, MNID_T, LPR_T }
+ ***********************************************************
+ */
+emerald_void term() {
+	psData.parsHistogram[BNF_term]++;
+	factor();
+	termPrime();
+	printf("%s%s\n", STR_LANGNAME, ": Term parsed");
+}
+
+/*
+ ************************************************************
+ * termPrime
+ * BNF: <termPrime> -> * <factor> <termPrime>
+ *                   | / <factor> <termPrime>
+ *                   | e
+ * FIRST = { e }  (see arithmeticExpressionPrime note above)
+ ***********************************************************
+ */
+emerald_void termPrime() {
+	; /* epsilon - see arithmeticExpressionPrime for extension note */
+}
+
 /*
 emerald_void printBNFData(ParserData psData) {
+ * factor
+ * BNF: <factor> -> INL_T | MNID_T | ( <arithmeticExpression> )
+ * FIRST = { INL_T, MNID_T, LPR_T }
+ ***********************************************************
+ */
+emerald_void factor() {
+	switch (lookahead.code) {
+	case INL_T:
+		matchToken(INL_T, NO_ATTR);
+		break;
+	case MNID_T:
+		matchToken(MNID_T, NO_ATTR);
+		break;
+	case LPR_T:
+		matchToken(LPR_T, NO_ATTR);
+		arithmeticExpression();
+		matchToken(RPR_T, NO_ATTR);
+		break;
+	default:
+		printError();
+		break;
+	}
 }
-*/
+
+/*
+ ************************************************************
+ * printBNFData
+ * Purpose: Prints BNF rule usage statistics after parsing.
+ ***********************************************************
+ */
 emerald_void printBNFData(ParserData psData) {
 	/* Print Parser statistics */
 	printf("Statistics:\n");
@@ -478,7 +805,8 @@ emerald_void printBNFData(ParserData psData) {
 	int cont = 0;
 	for (cont = 0; cont < NUM_BNF_RULES; cont++) {
 		if (psData.parsHistogram[cont] > 0)
-			printf("%s%s%s%d%s", "Token[", BNFStrTable[cont], "]=", psData.parsHistogram[cont], "\n");
+			printf("%s%s%s%d%s", "Token[", BNFStrTable[cont], "]=",
+				psData.parsHistogram[cont], "\n");
 	}
 	printf("----------------------------------\n");
 }

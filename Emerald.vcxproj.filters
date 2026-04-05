@@ -36,10 +36,10 @@
     <ClCompile Include="Step3Scanner.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main4Parser.c">
+    <ClCompile Include="Step4Parser.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Step4Parser.c">
+    <ClCompile Include="Main4Parser.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

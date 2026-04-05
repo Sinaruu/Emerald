@@ -109,7 +109,7 @@ emerald_intg main(int argc, char** argv) {
 		main3Scanner(argc, argv);
 		break;
 	case PGM_PSR:
-		printf("%s%c%s", "\n[Option '", PGM_PSR, "': Starting PARSER .....]\n\n");
+		printf("%s%c%s", "\n[Option '", PGM_PSR, "': Starting PARSER ....]\n\n");
 		main4Parser(argc, argv);
 		break;
 	default:
