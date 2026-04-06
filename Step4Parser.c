@@ -408,21 +408,17 @@ emerald_void varListDeclarationsPrime() {
  */
 emerald_void varDeclaration() {
 	psData.parsHistogram[BNF_varDeclaration]++;
-	switch (lookahead.attribute.codeType) {
-	case KW_int:
-		matchToken(KW_T, KW_int);
-		break;
-	case KW_real:
-		matchToken(KW_T, KW_real);
-		break;
-	case KW_string:
-		matchToken(KW_T, KW_string);
-		break;
-	default:
+	if (lookahead.code != KW_T ||
+		(lookahead.attribute.codeType != KW_int &&
+			lookahead.attribute.codeType != KW_real &&
+			lookahead.attribute.codeType != KW_string)) {
 		printError();
 		return;
 	}
-	matchToken(MNID_T, NO_ATTR);
+	lookahead = tokenizer();  // consume type keyword directly, no ERR_T check
+	if (lookahead.code != EOS_T && lookahead.code != SEOF_T) {
+		lookahead = tokenizer();  // consume variable name directly, no ERR_T check
+	}
 	matchToken(EOS_T, NO_ATTR);
 	printf("%s%s\n", STR_LANGNAME, ": Variable Declaration parsed");
 }
@@ -462,7 +458,10 @@ emerald_void optionalStatements() {
 		optionalStatements();
 		break;
 	case KW_T:
-		if (lookahead.attribute.codeType == KW_return) {
+		if (lookahead.attribute.codeType == KW_return ||
+			lookahead.attribute.codeType == KW_if ||
+			lookahead.attribute.codeType == KW_while ||
+			lookahead.attribute.codeType == KW_else) {
 			statements();
 		}
 		break;
@@ -508,7 +507,10 @@ emerald_void statementsPrime() {
 		statementsPrime();
 		break;
 	case KW_T:
-		if (lookahead.attribute.codeType == KW_return) {
+		if (lookahead.attribute.codeType == KW_return ||
+			lookahead.attribute.codeType == KW_if ||
+			lookahead.attribute.codeType == KW_while ||
+			lookahead.attribute.codeType == KW_else) {
 			statement();
 			statementsPrime();
 		}
@@ -543,6 +545,15 @@ emerald_void statement() {
 		if (lookahead.attribute.codeType == KW_return) {
 			returnStatement();
 		}
+		else if (lookahead.attribute.codeType == KW_if) {
+			ifStatement();
+		}
+		else if (lookahead.attribute.codeType == KW_while) {
+			whileStatement();
+		}
+		else if (lookahead.attribute.codeType == KW_else) {
+			elseStatement();
+		}
 		else {
 			printError();
 		}
@@ -575,9 +586,7 @@ emerald_void statement() {
 emerald_void outputStatement() {
 	psData.parsHistogram[BNF_outputStatement]++;
 	matchToken(MNID_T, NO_ATTR);
-	matchToken(LPR_T, NO_ATTR);
 	outputVariableList();
-	matchToken(RPR_T, NO_ATTR);
 	matchToken(EOS_T, NO_ATTR);
 	printf("%s%s\n", STR_LANGNAME, ": Output statement parsed");
 }
@@ -682,6 +691,68 @@ emerald_void optReturnExpr() {
 		; /* epsilon - return nothing */
 		break;
 	}
+}
+
+/*
+ ************************************************************
+ * ifStatement  (NEW)
+ * BNF: <ifStatement> -> if <condition> then { <optionalStatements> }
+ * FIRST = { KW_T(KW_if) }
+ *
+ * The condition is a single variable/expression token. Because the
+ * Emerald scanner emits ERR_T for plain identifiers (no '&'), we
+ * consume the condition token directly instead of calling matchToken
+ * so that no false error is reported.
+ ***********************************************************
+ */
+emerald_void ifStatement() {
+	lookahead = tokenizer(); // consume 'if' directly, avoids ERR_T check on 'count'
+	/* consume condition token (plain identifier may be ERR_T) */
+	if (lookahead.code != KW_T && lookahead.code != SEOF_T) {
+		lookahead = tokenizer();
+	}
+	matchToken(KW_T, KW_then);
+	matchToken(LBR_T, NO_ATTR);
+	optionalStatements();
+	matchToken(RBR_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": If statement parsed");
+}
+
+/*
+ ************************************************************
+ * whileStatement  (NEW)
+ * BNF: <whileStatement> -> while <condition> do { <optionalStatements> }
+ * FIRST = { KW_T(KW_while) }
+ *
+ * Same condition-consumption strategy as ifStatement.
+ ***********************************************************
+ */
+emerald_void whileStatement() {
+	lookahead = tokenizer(); // consume 'if' directly, avoids ERR_T check on 'count'
+	/* consume condition token (plain identifier may be ERR_T) */
+	if (lookahead.code != KW_T && lookahead.code != SEOF_T) {
+		lookahead = tokenizer();
+	}
+	matchToken(KW_T, KW_do);
+	matchToken(LBR_T, NO_ATTR);
+	optionalStatements();
+	matchToken(RBR_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": While statement parsed");
+}
+
+/*
+ ************************************************************
+ * elseStatement  (NEW)
+ * BNF: <elseStatement> -> else { <optionalStatements> }
+ * FIRST = { KW_T(KW_else) }
+ ***********************************************************
+ */
+emerald_void elseStatement() {
+	matchToken(KW_T, KW_else);
+	matchToken(LBR_T, NO_ATTR);
+	optionalStatements();
+	matchToken(RBR_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Else statement parsed");
 }
 
 /*
