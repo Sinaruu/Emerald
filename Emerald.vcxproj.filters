@@ -70,6 +70,12 @@
     <Text Include="CMakeLists.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="INPUT.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="INPUT_CODED.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />

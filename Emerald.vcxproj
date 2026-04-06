@@ -147,6 +147,8 @@
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
     <Text Include="CODED.txt" />
+    <Text Include="INPUT.txt" />
+    <Text Include="INPUT_CODED.txt" />
     <Text Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
