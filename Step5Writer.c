@@ -60,7 +60,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* Global variables */
+ /* Global variables */
 Variable variables[MAX_VARS];
 emerald_intg var_count = 0;
 emerald_intg initial_phase = 1; // Flag to track the initial phase
@@ -82,7 +82,7 @@ emerald_void assign_numeric_variable(const emerald_strg name, emerald_doub value
     emerald_intg idx = find_variable(name);
     if (idx == -1) {
         idx = var_count++;
-        strcpy_s(variables[idx].name, sizeof(variables[idx].name), name);
+        snprintf(variables[idx].name, sizeof(variables[idx].name), "%s", name);
     }
     variables[idx].type = NUMERIC;
     variables[idx].value.num_value = value;
@@ -93,11 +93,10 @@ emerald_void assign_string_variable(const emerald_strg name, const emerald_strg 
     emerald_intg idx = find_variable(name);
     if (idx == -1) {
         idx = var_count++;
-        strcpy_s(variables[idx].name, sizeof(variables[idx].name), name);
+        snprintf(variables[idx].name, sizeof(variables[idx].name), "%s", name);
     }
     variables[idx].type = STRING;
-    strncpy_s(variables[idx].value.str_value, sizeof(variables[idx].value.str_value), value, sizeof(variables[idx].value.str_value) - 1);
-    variables[idx].value.str_value[sizeof(variables[idx].value.str_value) - 1] = EOS;
+    snprintf(variables[idx].value.str_value, sizeof(variables[idx].value.str_value), "%s", value);
 }
 
 /* Assign boolean variable */
@@ -105,7 +104,7 @@ emerald_void assign_boolean_variable(const emerald_strg name, emerald_intg value
     emerald_intg idx = find_variable(name);
     if (idx == -1) {
         idx = var_count++;
-        strcpy_s(variables[idx].name, sizeof(variables[idx].name), name);
+        snprintf(variables[idx].name, sizeof(variables[idx].name), "%s", name);
     }
     variables[idx].type = BOOLEAN;
     variables[idx].value.bool_value = value;
@@ -124,7 +123,7 @@ emerald_void assign_char_variable(const emerald_strg name, emerald_char value) {
     emerald_intg idx = find_variable(name);
     if (idx == -1) {
         idx = var_count++;
-        strcpy_s(variables[idx].name, sizeof(variables[idx].name), name);
+        snprintf(variables[idx].name, sizeof(variables[idx].name), "%s", name);
     }
     variables[idx].type = CHAR;
     variables[idx].value.char_value = value;
@@ -175,6 +174,7 @@ emerald_doub parse_term(emerald_strg* expr) {
             var_name[i++] = *(*expr)++;
         } // Finishes with alpha and number
         var_name[i++] = *(*expr)++; // Includes the suffix
+        var_name[i] = EOS;
         value = get_numeric_value(var_name);
     }
     else {
@@ -238,7 +238,10 @@ emerald_void handle_write(emerald_strg expression) {
                 while (isalnum(*start)) {
                     var_name[i++] = *start++;
                 } // Finishes with alpha and number
-                var_name[i++] = *start++; // Includes the suffix
+                if (*start == '&') {
+                    var_name[i++] = *start++;
+                }
+                var_name[i] = EOS;
                 emerald_intg var_idx = find_variable(var_name);
                 if (var_idx != -1) {
                     if (variables[var_idx].type == STRING) {
@@ -269,12 +272,12 @@ emerald_void handle_write(emerald_strg expression) {
     }
     if (initial_phase) {
         strcat_s(output_buffer, sizeof(output_buffer), buffer);
-        char replacement[] = "[Undefined]";
         if (strlen(buffer) == 0) {
-            strcpy(buffer, replacement);
+            snprintf(buffer, sizeof(buffer), "%s", "[Undefined]");
             strcat_s(output_buffer, sizeof(output_buffer), buffer);
         }
         strcat_s(output_buffer, sizeof(output_buffer), "\n");
+        strncat_s(output_buffer, "\n", start, sizeof(output_buffer) - strlen(output_buffer) - 1);
     }
     else {
         printf("%s\n", buffer);
@@ -354,7 +357,7 @@ emerald_void process_file(const emerald_strg filename) {
     initial_phase = 0; // End of initial phase
     printf("%s", output_buffer); // Print the buffered write output
     printf("\nVariable values:\n");
-	emerald_intg i = 0;
+    emerald_intg i = 0;
     for (i = 0; i < var_count; i++) {
         if (variables[i].type == STRING) {
             printf("%s = \"%s\"\n", variables[i].name, variables[i].value.str_value);
@@ -386,19 +389,14 @@ emerald_strg* splitIntoLines(const emerald_strg content, emerald_intg* lineCount
             fprintf(stderr, "Exceeded maximum number of lines\n");
             break;
         }
-        emerald_intg lineLength = (emerald_intg) (end - start);
+        emerald_intg lineLength = (emerald_intg)(end - start);
         lines[*lineCount] = malloc(lineLength + 1);
         if (!lines[*lineCount]) {
             perror("Error allocating memory for line");
             break;
         }
-        // Use strncpy_s for safer copying
-        if (strncpy_s(lines[*lineCount], lineLength + 1, start, lineLength) != 0) {
-            perror("Error copying string using strncpy_s");
-            free(lines[*lineCount]);
-            break;
-        }
-        lines[*lineCount][lineLength] = EOS; // Null-terminate the string
+        // Use snprintf for safe copying
+        snprintf(lines[*lineCount], lineLength + 1, "%.*s", lineLength, start);
         (*lineCount)++;
         start = end + 1;
     }
@@ -436,16 +434,16 @@ emerald_void freeLines(emerald_strg* lines, emerald_intg lineCount) {
 emerald_void process_content(emerald_strg fileContent) {
     emerald_intg lineCount = 0;
     emerald_strg* lines = splitIntoLines(fileContent, &lineCount);
-    emerald_strg line = malloc(MAX_EXPR_LEN);
-    if (!lines || !line) {
+    emerald_strg line = NULL;
+    if (!lines) {
         return;
     }
     printf("Lines from content:\n");
     emerald_intg i = 0;
-	for (i = 0; i < lineCount; i++) {
-		line = lines[i];
-		calculate(line);
-	}
+    for (i = 0; i < lineCount; i++) {
+        line = lines[i];
+        calculate(line);
+    }
     initial_phase = 0; // End of initial phase
     printf("%s", output_buffer); // Print the buffered write output
     printf("\nVariable values:\n");

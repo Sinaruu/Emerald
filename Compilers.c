@@ -112,6 +112,10 @@ emerald_intg main(int argc, char** argv) {
 		printf("%s%c%s", "\n[Option '", PGM_PSR, "': Starting PARSER ....]\n\n");
 		main4Parser(argc, argv);
 		break;
+	case PGM_WRT:
+		printf("%s%c%s", "\n[Option '", PGM_WRT, "': Starting WRITER ....]\n\n");
+		main5Writer(argc, argv);
+		break;
 	default:
 		printf("%s%c%s%c%s%c%s%c%s%c%s", "OPTIONS:\n* [",
 			PGM_CDR, "] - Coder\n* [",

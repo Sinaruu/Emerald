@@ -84,7 +84,7 @@
 */
 
 emerald_intg main5Writer(emerald_intg argc, emerald_strg* argv) {
-	if (argc >= 2) {
+	if (argc >= 3) {
 		emerald_strg source = argv[2];
 		/* load source file into input buffer  */
 		printf("Reading file %s ....Please wait\n", source);
