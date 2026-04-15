@@ -132,10 +132,12 @@
     <ClCompile Include="Main2Reader.c" />
     <ClCompile Include="Main3Scanner.c" />
     <ClCompile Include="Main4Parser.c" />
+    <ClCompile Include="Main5Writer.c" />
     <ClCompile Include="Step1Coder.c" />
     <ClCompile Include="Step2Reader.c" />
     <ClCompile Include="Step3Scanner.c" />
     <ClCompile Include="Step4Parser.c" />
+    <ClCompile Include="Step5Writer.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compilers.h" />
@@ -143,6 +145,7 @@
     <ClInclude Include="Step2Reader.h" />
     <ClInclude Include="Step3Scanner.h" />
     <ClInclude Include="Step4Parser.h" />
+    <ClInclude Include="Step5Writer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
