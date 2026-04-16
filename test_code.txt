@@ -1,0 +1,11 @@
+a = 1
+b = a*2
+c = (a+b)*3
+write(c)
+d = "Paulo"
+write(d)
+write(d, "has", c, "years")
+e = true
+f = 'Z'
+write(e)
+write(f)

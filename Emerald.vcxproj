@@ -149,10 +149,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
-    <Text Include="CODED.txt" />
-    <Text Include="INPUT.txt" />
-    <Text Include="INPUT_CODED.txt" />
-    <Text Include="README.txt" />
+    <Text Include="encrypted_code.txt" />
+    <Text Include="test_code.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />

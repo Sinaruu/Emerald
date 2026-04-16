@@ -70,19 +70,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CODED.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="README.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
     <Text Include="CMakeLists.txt">
       <Filter>Source Files</Filter>
     </Text>
-    <Text Include="INPUT.txt">
+    <Text Include="test_code.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="INPUT_CODED.txt">
+    <Text Include="encrypted_code.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
